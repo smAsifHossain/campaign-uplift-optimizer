@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Causal uplift modeling and campaign budget optimization on randomized advertising data.">
+    <meta name="theme-color" content="#111827">
+    <title>Campaign Uplift Optimizer</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="Campaign Uplift Optimizer home">
+        <span class="brand-mark" aria-hidden="true">U+</span>
+        <span>
+          <strong>Campaign Uplift Optimizer</strong>
+          <small>Causal targeting decision system</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-link active" data-view="overview" type="button">Overview</button>
+        <button class="nav-link" data-view="experiment" type="button">Experiment</button>
+        <button class="nav-link" data-view="models" type="button">Model evaluation</button>
+        <button class="nav-link" data-view="optimizer" type="button">Budget optimizer</button>
+        <button class="nav-link" data-view="methodology" type="button">Methodology</button>
+      </nav>
+      <a class="github-link" href="https://github.com/smAsifHossain/campaign-uplift-optimizer" target="_blank" rel="noreferrer">View source</a>
+    </header>
+
+    <div id="status-banner" class="status-banner" hidden></div>
+    <main id="main-content" class="shell">
+      <div id="loading" class="loading" role="status">Loading verified analysis results…</div>
+      <div id="load-error" class="error-panel" role="alert" hidden>
+        <h1>Results could not be loaded</h1>
+        <p>Run the analysis and site build commands documented in the repository README.</p>
+      </div>
+
+      <section id="view-overview" class="view" data-page="overview" hidden>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Randomized experiment → targeting decision</p>
+            <h1>Target customers who change <em>because of</em> the campaign.</h1>
+            <p class="lede">This project compares causal uplift, conversion propensity, and random targeting—then converts incremental impact into an honest campaign recommendation.</p>
+            <div class="hero-actions">
+              <button class="primary-action" type="button" data-go="optimizer">Explore the budget decision</button>
+              <button class="secondary-action" type="button" data-go="methodology">Review methodology</button>
+            </div>
+          </div>
+          <aside class="decision-card" aria-labelledby="overview-decision-title">
+            <div class="card-kicker">Default scenario</div>
+            <h2 id="overview-decision-title">Controlled rollout</h2>
+            <p id="overview-decision-copy">Loading decision evidence…</p>
+            <dl class="decision-facts">
+              <div><dt>Selected model</dt><dd id="overview-model">—</dd></div>
+              <div><dt>Reach selected on validation</dt><dd id="overview-reach">—</dd></div>
+              <div><dt>Locked-test scenario profit</dt><dd id="overview-profit">—</dd></div>
+            </dl>
+          </aside>
+        </div>
+
+        <div class="metrics-grid" aria-label="Key evidence">
+          <article class="metric"><span>Test-set customers</span><strong id="metric-test-rows">—</strong><small>Grouped holdout</small></article>
+          <article class="metric"><span>Average treatment effect</span><strong id="metric-ate">—</strong><small id="metric-ate-ci">—</small></article>
+          <article class="metric"><span>Incremental conversions</span><strong id="metric-incremental">—</strong><small>Per 1M eligible, default reach</small></article>
+          <article class="metric"><span>Test AUUC above random</span><strong id="metric-auuc">—</strong><small>Selected ranking policy</small></article>
+        </div>
+
+        <div class="two-column section-gap">
+          <article class="panel chart-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Policy comparison</p><h2>Incremental value by campaign reach</h2></div>
+              <div class="legend"><span><i class="series-uplift"></i>Uplift</span><span><i class="series-propensity"></i>Propensity</span><span><i class="series-random"></i>Random</span></div>
+            </div>
+            <div id="overview-policy-chart" class="chart" aria-label="Policy value chart"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">Why it matters</p><h2>Prediction is not incrementality</h2></div></div>
+            <div class="concept-list">
+              <div><div><h3>Propensity</h3><p>Finds customers likely to convert, including people who would convert without advertising.</p></div></div>
+              <div><div><h3>Uplift</h3><p>Ranks customers by the estimated change caused by treatment, evaluated on randomized holdout data.</p></div></div>
+              <div><div><h3>Policy</h3><p>Combines incremental effect, reach, cost, value, and uncertainty into a decision.</p></div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-experiment" class="view" data-page="experiment" hidden>
+        <header class="page-header"><p class="eyebrow">Experiment health</p><h1>Establish causality before modeling heterogeneity.</h1><p>The average randomized effect is the benchmark every targeting policy must respect.</p></header>
+        <div class="metrics-grid three">
+          <article class="metric"><span>Control conversion rate</span><strong id="experiment-control-rate">—</strong><small id="experiment-control-n">—</small></article>
+          <article class="metric"><span>Treatment conversion rate</span><strong id="experiment-treatment-rate">—</strong><small id="experiment-treatment-n">—</small></article>
+          <article class="metric"><span>Relative lift</span><strong id="experiment-relative-lift">—</strong><small id="experiment-pvalue">—</small></article>
+        </div>
+        <div class="two-column section-gap">
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Effect estimate</p><h2>Average treatment effect and uncertainty</h2></div></div>
+            <div id="experiment-effect-chart" class="chart compact" aria-label="Average treatment effect confidence interval"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">Integrity checks</p><h2>Evaluation contract</h2></div></div>
+            <dl class="audit-list">
+              <div><dt>Assignment</dt><dd>Randomized treatment/control</dd></div>
+              <div><dt>Split</dt><dd>Feature-grouped 60 / 20 / 20</dd></div>
+              <div><dt>Model selection</dt><dd>Validation AUUC above random</dd></div>
+              <div><dt>Final reporting</dt><dd>Untouched test split</dd></div>
+              <div><dt>Monetary data</dt><dd>Not present; scenario inputs only</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-models" class="view" data-page="models" hidden>
+        <header class="page-header"><p class="eyebrow">Model evaluation</p><h1>Select on validation. Report once on test.</h1><p>Models are judged by the value of their ranking policy—not ordinary classification accuracy.</p></header>
+        <div class="two-column">
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Candidate comparison</p><h2>AUUC above random</h2></div></div>
+            <div id="model-comparison-chart" class="chart" aria-label="Model comparison chart"></div>
+          </article>
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Calibration</p><h2>Predicted versus realized uplift</h2></div></div>
+            <div id="calibration-chart" class="chart" aria-label="Uplift calibration chart"></div>
+          </article>
+        </div>
+        <article class="panel section-gap">
+          <div class="panel-heading"><div><p class="eyebrow">Evidence table</p><h2>Validation and locked-test results</h2></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Model</th><th>Role</th><th>Validation AUUC</th><th>Test AUUC</th><th>Decision</th></tr></thead><tbody id="model-table-body"></tbody></table></div>
+        </article>
+        <article id="policy-comparison-note" class="source-note section-gap" aria-live="polite"></article>
+      </section>
+
+      <section id="view-optimizer" class="view" data-page="optimizer" hidden>
+        <header class="page-header"><p class="eyebrow">Interactive decision tool</p><h1>Turn causal lift into campaign economics.</h1><p>Adjust business assumptions; the model evidence stays fixed while the recommended reach changes.</p></header>
+        <div class="optimizer-layout">
+          <aside class="panel controls-panel" aria-label="Campaign assumptions">
+            <div class="panel-heading"><div><p class="eyebrow">Inputs</p><h2>Campaign assumptions</h2></div><span class="scenario-label">Scenario—not observed revenue</span></div>
+            <label class="control"><span><b>Eligible customers</b><output id="population-output">—</output></span><input id="population-input" type="range" min="100000" max="5000000" step="100000"></label>
+            <label class="control"><span><b>Maximum reach</b><output id="reach-output">—</output></span><input id="reach-input" type="range" min="5" max="100" step="5"></label>
+            <label class="control"><span><b>Contact cost</b><output id="cost-output">—</output></span><input id="cost-input" type="range" min="1" max="100" step="1"></label>
+            <label class="control"><span><b>Value per conversion</b><output id="value-output">—</output></span><input id="value-input" type="range" min="20" max="500" step="10"></label>
+            <div id="optimizer-decision" class="optimizer-decision" aria-live="polite">
+              <span>Recommendation</span><strong id="optimizer-decision-title">—</strong><p id="optimizer-decision-copy">—</p>
+            </div>
+          </aside>
+          <div class="optimizer-main">
+            <div class="metrics-grid three">
+              <article class="metric"><span>Recommended reach</span><strong id="optimizer-targeted">—</strong><small id="optimizer-fraction">—</small></article>
+              <article class="metric"><span>Incremental conversions</span><strong id="optimizer-incremental">—</strong><small id="optimizer-conversion-ci">—</small></article>
+              <article class="metric"><span>Scenario profit</span><strong id="optimizer-profit">—</strong><small id="optimizer-break-even">—</small></article>
+            </div>
+            <article class="panel chart-panel section-gap-small">
+              <div class="panel-heading"><div><p class="eyebrow">Decision curve</p><h2>Scenario profit by reach</h2></div></div>
+              <div id="optimizer-chart" class="chart" aria-label="Scenario profit curve"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-methodology" class="view" data-page="methodology" hidden>
+        <header class="page-header"><p class="eyebrow">Reproducible methodology</p><h1>A decision system, not a modeling notebook.</h1><p>Every published number is generated from code, validated artifacts, and a documented experimental contract.</p></header>
+        <div class="pipeline" aria-label="Analysis workflow">
+          <div><h2>Acquire</h2><p>Official Criteo v2.1 archive, source attribution, checksum and schema validation.</p></div>
+          <div><h2>Split</h2><p>Stable feature hashing prevents identical covariate groups crossing data splits.</p></div>
+          <div><h2>Select</h2><p>Causal candidates compete on validation AUUC above a random policy.</p></div>
+          <div><h2>Evaluate</h2><p>One locked test set produces policy curves, uncertainty and calibration.</p></div>
+          <div><h2>Decide</h2><p>Scenario economics combine incremental effect, reach, cost and value.</p></div>
+        </div>
+        <div class="two-column section-gap">
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">Reproduce it</p><h2>Core commands</h2></div></div>
+            <pre><code>python -m campaign_uplift acquire
+python -m campaign_uplift run --sample-fraction 0.10 --build-site
+pytest
+ruff check .</code></pre>
+            <p class="supporting">Raw records, local models, and environments are excluded from Git. Only aggregate evidence is published.</p>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">Limits</p><h2>What this project does not claim</h2></div></div>
+            <ul id="limitations-list" class="limitations"></ul>
+          </article>
+        </div>
+        <article class="source-note section-gap">
+          <strong>Dataset:</strong> Criteo Uplift Prediction Dataset v2.1 · CC BY-NC-SA 4.0 · raw data is not redistributed.
+          <a href="https://ailab.criteo.com/criteo-uplift-prediction-dataset/" target="_blank" rel="noreferrer">Publisher and terms</a>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer"><span>Built by S M Asif Hossain</span><span>Python · scikit-learn · randomized policy evaluation · GitHub Pages</span></footer>
+    <script src="app.js"></script>
+  </body>
+</html>

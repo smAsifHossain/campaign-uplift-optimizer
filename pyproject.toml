@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "campaign-uplift-optimizer"
+version = "0.1.0"
+description = "Causal uplift modeling and campaign budget optimization on randomized advertising data."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { file = "LICENSE" }
+authors = [{ name = "S M Asif Hossain" }]
+dependencies = [
+  "duckdb==2.0.1",
+  "numpy==2.5.5",
+  "pandas==3.1.1",
+  "pyarrow==26.0.1",
+  "scikit-learn==1.9.1",
+  "scipy==1.18.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.2.0",
+  "ruff==0.17.6",
+]
+
+[project.scripts]
+campaign-uplift = "campaign_uplift.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

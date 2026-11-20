@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Local data and trained objects
+data/raw/
+data/processed/
+models/
+*.joblib
+*.pkl
+
+# Local-only analysis outputs
+artifacts/*.tmp
+artifacts/smoke/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

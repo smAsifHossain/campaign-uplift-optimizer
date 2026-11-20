@@ -1,0 +1,839 @@
+{
+  "schema_version": "1.0",
+  "status": "portfolio_real_data",
+  "generated_at_utc": "2026-11-20T16:35:54.575471+00:00",
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "scikit_learn": "1.9.1",
+    "elapsed_seconds": 26.733481900009792
+  },
+  "configuration": {
+    "seed": 20261120,
+    "sample_fraction": 0.1,
+    "chunk_size": 400000,
+    "train_percent": 60,
+    "validation_percent": 20,
+    "max_boost_iterations": 120,
+    "min_samples_leaf": 100,
+    "bootstrap_repetitions": 300,
+    "default_population": 1000000,
+    "default_contact_cost": 0.08,
+    "default_conversion_value": 120.0,
+    "default_max_reach": 0.5
+  },
+  "source": {
+    "source_type": "real_criteo",
+    "path": "data/raw/criteo-uplift-v2.1.csv.gz",
+    "bytes": 311422618,
+    "sha256": "2716e1bf0fd157a93b5bf86924d9088419dfbac2022c6cd90030220634f616dc",
+    "columns": [
+      "f0",
+      "f1",
+      "f2",
+      "f3",
+      "f4",
+      "f5",
+      "f6",
+      "f7",
+      "f8",
+      "f9",
+      "f10",
+      "f11",
+      "treatment",
+      "conversion",
+      "visit",
+      "exposure"
+    ],
+    "mirror_commit": "2424920019e49d52d72c13ac1143ec5d53af276b",
+    "rows_scanned": 13979592,
+    "rows_sampled": 1398296,
+    "requested_sample_fraction": 0.1,
+    "realized_sample_fraction": 0.10002409226249236,
+    "publisher_page": "https://ailab.criteo.com/criteo-uplift-prediction-dataset/",
+    "dataset_license": "CC BY-NC-SA 4.0",
+    "raw_data_committed": false
+  },
+  "dataset": {
+    "overall": {
+      "rows": 1398296,
+      "treatment_rate": 0.8503900461704818,
+      "control_rate": 0.14960995382951825,
+      "conversion_rate": 0.00294787369770063,
+      "visit_rate": 0.04721532493835354,
+      "missing_values": 0,
+      "duplicate_feature_rows": 30244
+    },
+    "train": {
+      "rows": 838785,
+      "treatment_rate": 0.8502560250839011,
+      "control_rate": 0.14974397491609892,
+      "conversion_rate": 0.0029483121419672503,
+      "visit_rate": 0.04736255417061583,
+      "missing_values": 0,
+      "duplicate_feature_rows": 18329
+    },
+    "validation": {
+      "rows": 279362,
+      "treatment_rate": 0.850008233045296,
+      "control_rate": 0.14999176695470395,
+      "conversion_rate": 0.0029209412876482843,
+      "visit_rate": 0.04723262290504793,
+      "missing_values": 0,
+      "duplicate_feature_rows": 5972
+    },
+    "test": {
+      "rows": 280149,
+      "treatment_rate": 0.8511720548708009,
+      "control_rate": 0.14882794512919906,
+      "conversion_rate": 0.002973417717000596,
+      "visit_rate": 0.04675726131451478,
+      "missing_values": 0,
+      "duplicate_feature_rows": 5943
+    },
+    "split_method": "Stable feature-vector hash; identical covariates stay in one split."
+  },
+  "experiment": {
+    "rows": 280149,
+    "treated_rows": 238455,
+    "control_rows": 41694,
+    "treatment_probability": 0.8511720548708009,
+    "treated_conversion_rate": 0.003120085550732843,
+    "control_conversion_rate": 0.0021345997025950976,
+    "absolute_effect": 0.0009854858481377453,
+    "relative_lift": 0.46167243766578825,
+    "standard_error": 0.0002532415576680149,
+    "ci_95_low": 0.0004891415157196129,
+    "ci_95_high": 0.0014818301805558777,
+    "z_score": 3.8914854939790744,
+    "p_value_two_sided": 9.963234681303312e-05
+  },
+  "selection": {
+    "selected_model": "linear_t_learner",
+    "selection_metric": "validation AUUC above random",
+    "selected_reach_on_validation": 0.19999856816603548,
+    "test_set_used_for_selection": false
+  },
+  "model_comparison": [
+    {
+      "model": "linear_t_learner",
+      "category": "causal_uplift",
+      "selected": true,
+      "validation_auuc_above_random": 0.6536776886013681,
+      "test_auuc_above_random": 0.4282750318780648,
+      "fit_seconds": 2.8521230000187643
+    },
+    {
+      "model": "boosted_t_learner",
+      "category": "causal_uplift",
+      "selected": false,
+      "validation_auuc_above_random": 0.4512776581085422,
+      "test_auuc_above_random": 0.2403248811250111,
+      "fit_seconds": 5.320020499988459
+    },
+    {
+      "model": "boosted_s_learner",
+      "category": "causal_uplift",
+      "selected": false,
+      "validation_auuc_above_random": 0.6091128675161028,
+      "test_auuc_above_random": 0.4486817202209011,
+      "fit_seconds": 7.162752499978524
+    },
+    {
+      "model": "conversion_propensity",
+      "category": "predictive_baseline",
+      "selected": false,
+      "validation_auuc_above_random": 0.6656792547204667,
+      "test_auuc_above_random": 0.44835724642261876,
+      "fit_seconds": null
+    },
+    {
+      "model": "random_targeting",
+      "category": "random_baseline",
+      "selected": false,
+      "validation_auuc_above_random": null,
+      "test_auuc_above_random": -0.0012643679836292587,
+      "fit_seconds": null
+    }
+  ],
+  "policy_curves": {
+    "uplift": [
+      {
+        "fraction": 0.04999839371191759,
+        "selected_rows": 14007,
+        "incremental_per_1000_eligible": 0.789991371246421,
+        "incremental_per_1000_targeted": 15.80033502272532,
+        "ci_95_low": 0.35198011529046774,
+        "ci_95_high": 1.2280026272023743,
+        "random_policy_per_1000_eligible": 0.049272709432713974
+      },
+      {
+        "fraction": 0.1000003569529072,
+        "selected_rows": 28015,
+        "incremental_per_1000_eligible": 0.8809309222985529,
+        "incremental_per_1000_targeted": 8.8092777780124,
+        "ci_95_low": 0.423881884397767,
+        "ci_95_high": 1.3379799601993387,
+        "random_policy_per_1000_eligible": 0.09854893658581294
+      },
+      {
+        "fraction": 0.1499987506648248,
+        "selected_rows": 42022,
+        "incremental_per_1000_eligible": 0.9024164315033258,
+        "incremental_per_1000_targeted": 6.016159651354653,
+        "ci_95_low": 0.43377572820170474,
+        "ci_95_high": 1.371057134804947,
+        "random_policy_per_1000_eligible": 0.14782164601852693
+      },
+      {
+        "fraction": 0.2000007139058144,
+        "selected_rows": 56030,
+        "incremental_per_1000_eligible": 0.9017559099083419,
+        "incremental_per_1000_targeted": 4.508763455379475,
+        "ci_95_low": 0.42488905588918424,
+        "ci_95_high": 1.3786227639274995,
+        "random_policy_per_1000_eligible": 0.1970978731716259
+      },
+      {
+        "fraction": 0.249999107617732,
+        "selected_rows": 70037,
+        "incremental_per_1000_eligible": 0.9478862070293919,
+        "incremental_per_1000_targeted": 3.791558362195368,
+        "ci_95_low": 0.4702420106869264,
+        "ci_95_high": 1.4255304033718574,
+        "random_policy_per_1000_eligible": 0.24637058260433986
+      },
+      {
+        "fraction": 0.30000107085872163,
+        "selected_rows": 84045,
+        "incremental_per_1000_eligible": 0.9574512477052258,
+        "incremental_per_1000_targeted": 3.191492766891205,
+        "ci_95_low": 0.47693694985087753,
+        "ci_95_high": 1.4379655455595741,
+        "random_policy_per_1000_eligible": 0.29564680975743884
+      },
+      {
+        "fraction": 0.3499994645706392,
+        "selected_rows": 98052,
+        "incremental_per_1000_eligible": 0.9868068913277122,
+        "incremental_per_1000_targeted": 2.819452574129719,
+        "ci_95_low": 0.5058015663917732,
+        "ci_95_high": 1.467812216263651,
+        "random_policy_per_1000_eligible": 0.3449195191901528
+      },
+      {
+        "fraction": 0.4000014278116288,
+        "selected_rows": 112060,
+        "incremental_per_1000_eligible": 0.9754036151303416,
+        "incremental_per_1000_targeted": 2.4385003335280215,
+        "ci_95_low": 0.49189674320962506,
+        "ci_95_high": 1.458910487051058,
+        "random_policy_per_1000_eligible": 0.3941957463432518
+      },
+      {
+        "fraction": 0.4499998215235464,
+        "selected_rows": 126067,
+        "incremental_per_1000_eligible": 0.9921782686289056,
+        "incremental_per_1000_targeted": 2.204841471424871,
+        "ci_95_low": 0.5083924899586978,
+        "ci_95_high": 1.4759640472991133,
+        "random_policy_per_1000_eligible": 0.4434684557759657
+      },
+      {
+        "fraction": 0.499998215235464,
+        "selected_rows": 140074,
+        "incremental_per_1000_eligible": 0.9244191330396665,
+        "incremental_per_1000_targeted": 1.8488448655848304,
+        "ci_95_low": 0.43375898219437775,
+        "ci_95_high": 1.4150792838849553,
+        "random_policy_per_1000_eligible": 0.4927411652086797
+      },
+      {
+        "fraction": 0.5500001784764535,
+        "selected_rows": 154082,
+        "incremental_per_1000_eligible": 0.9495811132875119,
+        "incremental_per_1000_targeted": 1.7265105548109665,
+        "ci_95_low": 0.45850872291190087,
+        "ci_95_high": 1.440653503663123,
+        "random_policy_per_1000_eligible": 0.5420173923617787
+      },
+      {
+        "fraction": 0.5999985721883712,
+        "selected_rows": 168089,
+        "incremental_per_1000_eligible": 0.9579684400367938,
+        "incremental_per_1000_targeted": 1.5966178661772508,
+        "ci_95_low": 0.4667587172930633,
+        "ci_95_high": 1.4491781627805245,
+        "random_policy_per_1000_eligible": 0.5912901017944926
+      },
+      {
+        "fraction": 0.6500005354293608,
+        "selected_rows": 182097,
+        "incremental_per_1000_eligible": 0.9621621034114347,
+        "incremental_per_1000_targeted": 1.480248170527851,
+        "ci_95_low": 0.47088372961620395,
+        "ci_95_high": 1.4534404772066654,
+        "random_policy_per_1000_eligible": 0.6405663289475917
+      },
+      {
+        "fraction": 0.6999989291412784,
+        "selected_rows": 196104,
+        "incremental_per_1000_eligible": 0.9663557667860756,
+        "incremental_per_1000_targeted": 1.3805103501680351,
+        "ci_95_low": 0.4750087520220792,
+        "ci_95_high": 1.457702781550072,
+        "random_policy_per_1000_eligible": 0.6898390383803056
+      },
+      {
+        "fraction": 0.750000892382268,
+        "selected_rows": 210112,
+        "incremental_per_1000_eligible": 0.9705494301607165,
+        "incremental_per_1000_targeted": 1.2940643671474958,
+        "ci_95_low": 0.47913378450646404,
+        "ci_95_high": 1.461965075814969,
+        "random_policy_per_1000_eligible": 0.7391152655334046
+      },
+      {
+        "fraction": 0.7999992860941856,
+        "selected_rows": 224119,
+        "incremental_per_1000_eligible": 0.9507588272140645,
+        "incremental_per_1000_targeted": 1.1884495945689253,
+        "ci_95_low": 0.4570309614523959,
+        "ci_95_high": 1.444486692975733,
+        "random_policy_per_1000_eligible": 0.7883879749661185
+      },
+      {
+        "fraction": 0.8500012493351752,
+        "selected_rows": 238127,
+        "incremental_per_1000_eligible": 0.9633398173379871,
+        "incremental_per_1000_targeted": 1.1333392957851052,
+        "ci_95_low": 0.4694070759724258,
+        "ci_95_high": 1.4572725587035484,
+        "random_policy_per_1000_eligible": 0.8376642021192175
+      },
+      {
+        "fraction": 0.8999996430470928,
+        "selected_rows": 252134,
+        "incremental_per_1000_eligible": 0.9633398173379871,
+        "incremental_per_1000_targeted": 1.0703779993472506,
+        "ci_95_low": 0.4694070759724258,
+        "ci_95_high": 1.4572725587035484,
+        "random_policy_per_1000_eligible": 0.8869369115519314
+      },
+      {
+        "fraction": 0.9500016062880824,
+        "selected_rows": 266142,
+        "incremental_per_1000_eligible": 0.984308134211192,
+        "incremental_per_1000_targeted": 1.0361120735965432,
+        "ci_95_low": 0.4900341319760082,
+        "ci_95_high": 1.4785821364463758,
+        "random_policy_per_1000_eligible": 0.9362131387050305
+      },
+      {
+        "fraction": 1.0,
+        "selected_rows": 280149,
+        "incremental_per_1000_eligible": 0.9854858481377444,
+        "incremental_per_1000_targeted": 0.9854858481377444,
+        "ci_95_low": 0.48857348060769235,
+        "ci_95_high": 1.4823982156677964,
+        "random_policy_per_1000_eligible": 0.9854858481377444
+      }
+    ],
+    "propensity": [
+      {
+        "fraction": 0.04999839371191759,
+        "selected_rows": 14007,
+        "incremental_per_1000_eligible": 0.8186864932739234,
+        "incremental_per_1000_targeted": 16.374255900920712,
+        "ci_95_low": 0.3713566222608352,
+        "ci_95_high": 1.2660163642870117,
+        "random_policy_per_1000_eligible": 0.049272709432713974
+      },
+      {
+        "fraction": 0.1000003569529072,
+        "selected_rows": 28015,
+        "incremental_per_1000_eligible": 0.9072706164729507,
+        "incremental_per_1000_targeted": 9.072673779556691,
+        "ci_95_low": 0.44692979027792723,
+        "ci_95_high": 1.3676114426679742,
+        "random_policy_per_1000_eligible": 0.09854893658581294
+      },
+      {
+        "fraction": 0.1499987506648248,
+        "selected_rows": 42022,
+        "incremental_per_1000_eligible": 0.9455307791762869,
+        "incremental_per_1000_targeted": 6.303591029828607,
+        "ci_95_low": 0.4733933496122569,
+        "ci_95_high": 1.417668208740317,
+        "random_policy_per_1000_eligible": 0.14782164601852693
+      },
+      {
+        "fraction": 0.2000007139058144,
+        "selected_rows": 56030,
+        "incremental_per_1000_eligible": 0.9490639209559437,
+        "incremental_per_1000_targeted": 4.745302666283897,
+        "ci_95_low": 0.468690013260347,
+        "ci_95_high": 1.4294378286515403,
+        "random_policy_per_1000_eligible": 0.1970978731716259
+      },
+      {
+        "fraction": 0.249999107617732,
+        "selected_rows": 70037,
+        "incremental_per_1000_eligible": 0.9586289616317779,
+        "incremental_per_1000_targeted": 3.834529533991762,
+        "ci_95_low": 0.4754011654231764,
+        "ci_95_high": 1.4418567578403794,
+        "random_policy_per_1000_eligible": 0.24637058260433986
+      },
+      {
+        "fraction": 0.30000107085872163,
+        "selected_rows": 84045,
+        "incremental_per_1000_eligible": 0.9879846052542641,
+        "incremental_per_1000_targeted": 3.2932702620902727,
+        "ci_95_low": 0.5042685374471696,
+        "ci_95_high": 1.4717006730613587,
+        "random_policy_per_1000_eligible": 0.29564680975743884
+      },
+      {
+        "fraction": 0.3499994645706392,
+        "selected_rows": 98052,
+        "incremental_per_1000_eligible": 1.0005655953781871,
+        "incremental_per_1000_targeted": 2.858763217268427,
+        "ci_95_low": 0.5166404266029168,
+        "ci_95_high": 1.4844907641534575,
+        "random_policy_per_1000_eligible": 0.3449195191901528
+      },
+      {
+        "fraction": 0.4000014278116288,
+        "selected_rows": 112060,
+        "incremental_per_1000_eligible": 1.0215339122513916,
+        "incremental_per_1000_targeted": 2.553825664673526,
+        "ci_95_low": 0.5372604524579139,
+        "ci_95_high": 1.5058073720448693,
+        "random_policy_per_1000_eligible": 0.3941957463432518
+      },
+      {
+        "fraction": 0.4499998215235464,
+        "selected_rows": 126067,
+        "incremental_per_1000_eligible": 1.0383085657499556,
+        "incremental_per_1000_targeted": 2.3073532834626373,
+        "ci_95_low": 0.5537566623508339,
+        "ci_95_high": 1.5228604691490772,
+        "random_policy_per_1000_eligible": 0.4434684557759657
+      },
+      {
+        "fraction": 0.499998215235464,
+        "selected_rows": 140074,
+        "incremental_per_1000_eligible": 1.0227116261779443,
+        "incremental_per_1000_targeted": 2.0454305535797146,
+        "ci_95_low": 0.5357456167103901,
+        "ci_95_high": 1.5096776356454984,
+        "random_policy_per_1000_eligible": 0.4927411652086797
+      },
+      {
+        "fraction": 0.5500001784764535,
+        "selected_rows": 154082,
+        "incremental_per_1000_eligible": 0.9747430935353579,
+        "incremental_per_1000_targeted": 1.7722595949613644,
+        "ci_95_low": 0.48325882706513723,
+        "ci_95_high": 1.4662273600055786,
+        "random_policy_per_1000_eligible": 0.5420173923617787
+      },
+      {
+        "fraction": 0.5999985721883712,
+        "selected_rows": 168089,
+        "incremental_per_1000_eligible": 0.9549524905887056,
+        "incremental_per_1000_targeted": 1.5915912718020528,
+        "ci_95_low": 0.46115632302595805,
+        "ci_95_high": 1.448748658151453,
+        "random_policy_per_1000_eligible": 0.5912901017944926
+      },
+      {
+        "fraction": 0.6500005354293608,
+        "selected_rows": 182097,
+        "incremental_per_1000_eligible": 0.9633398173379873,
+        "incremental_per_1000_targeted": 1.4820600366146595,
+        "ci_95_low": 0.46940707597242604,
+        "ci_95_high": 1.4572725587035487,
+        "random_policy_per_1000_eligible": 0.6405663289475917
+      },
+      {
+        "fraction": 0.6999989291412784,
+        "selected_rows": 196104,
+        "incremental_per_1000_eligible": 0.9675334807126282,
+        "incremental_per_1000_targeted": 1.3821928012083493,
+        "ci_95_low": 0.4735324673370937,
+        "ci_95_high": 1.4615344940881627,
+        "random_policy_per_1000_eligible": 0.6898390383803056
+      },
+      {
+        "fraction": 0.750000892382268,
+        "selected_rows": 210112,
+        "incremental_per_1000_eligible": 0.9477428777659758,
+        "incremental_per_1000_targeted": 1.2636556668027545,
+        "ci_95_low": 0.45144169076866136,
+        "ci_95_high": 1.4440440647632902,
+        "random_policy_per_1000_eligible": 0.7391152655334046
+      },
+      {
+        "fraction": 0.7999992860941856,
+        "selected_rows": 224119,
+        "incremental_per_1000_eligible": 0.9603238678898985,
+        "incremental_per_1000_targeted": 1.2004059060833179,
+        "ci_95_low": 0.4638188660834168,
+        "ci_95_high": 1.4568288696963803,
+        "random_policy_per_1000_eligible": 0.7883879749661185
+      },
+      {
+        "fraction": 0.8500012493351752,
+        "selected_rows": 238127,
+        "incremental_per_1000_eligible": 0.9687111946391803,
+        "incremental_per_1000_targeted": 1.1396585539101896,
+        "ci_95_low": 0.47207036518938433,
+        "ci_95_high": 1.4653520240889764,
+        "random_policy_per_1000_eligible": 0.8376642021192175
+      },
+      {
+        "fraction": 0.8999996430470928,
+        "selected_rows": 252134,
+        "incremental_per_1000_eligible": 0.9687111946391803,
+        "incremental_per_1000_targeted": 1.0763461987156502,
+        "ci_95_low": 0.47207036518938433,
+        "ci_95_high": 1.4653520240889764,
+        "random_policy_per_1000_eligible": 0.8869369115519314
+      },
+      {
+        "fraction": 0.9500016062880824,
+        "selected_rows": 266142,
+        "incremental_per_1000_eligible": 0.9729048580138212,
+        "incremental_per_1000_targeted": 1.0241086452634838,
+        "ci_95_low": 0.4761961293991727,
+        "ci_95_high": 1.4696135866284696,
+        "random_policy_per_1000_eligible": 0.9362131387050305
+      },
+      {
+        "fraction": 1.0,
+        "selected_rows": 280149,
+        "incremental_per_1000_eligible": 0.9854858481377444,
+        "incremental_per_1000_targeted": 0.9854858481377444,
+        "ci_95_low": 0.48857348060769235,
+        "ci_95_high": 1.4823982156677964,
+        "random_policy_per_1000_eligible": 0.9854858481377444
+      }
+    ],
+    "random": [
+      {
+        "fraction": 0.04999839371191759,
+        "selected_rows": 14007,
+        "incremental_per_1000_eligible": 0.0790190825231933,
+        "incremental_per_1000_targeted": 1.5804324230591904,
+        "ci_95_low": -0.016172364554940907,
+        "ci_95_high": 0.1742105296013275,
+        "random_policy_per_1000_eligible": 0.049272709432713974
+      },
+      {
+        "fraction": 0.1000003569529072,
+        "selected_rows": 28015,
+        "incremental_per_1000_eligible": 0.12802199982891604,
+        "incremental_per_1000_targeted": 1.2802154285229699,
+        "ci_95_low": -0.031438735852586164,
+        "ci_95_high": 0.28748273551041825,
+        "random_policy_per_1000_eligible": 0.09854893658581294
+      },
+      {
+        "fraction": 0.1499987506648248,
+        "selected_rows": 42022,
+        "incremental_per_1000_eligible": 0.19681552008129113,
+        "incremental_per_1000_targeted": 1.31211439567973,
+        "ci_95_low": -0.0019721211429479246,
+        "ci_95_high": 0.3956031613055302,
+        "random_policy_per_1000_eligible": 0.14782164601852693
+      },
+      {
+        "fraction": 0.2000007139058144,
+        "selected_rows": 56030,
+        "incremental_per_1000_eligible": 0.28841559272840717,
+        "incremental_per_1000_targeted": 1.442072816121195,
+        "ci_95_low": 0.06755343702898067,
+        "ci_95_high": 0.5092777484278337,
+        "random_policy_per_1000_eligible": 0.1970978731716259
+      },
+      {
+        "fraction": 0.249999107617732,
+        "selected_rows": 70037,
+        "incremental_per_1000_eligible": 0.3506600217530368,
+        "incremental_per_1000_targeted": 1.4026450937945873,
+        "ci_95_low": 0.11072084914926744,
+        "ci_95_high": 0.5905991943568061,
+        "random_policy_per_1000_eligible": 0.24637058260433986
+      },
+      {
+        "fraction": 0.30000107085872163,
+        "selected_rows": 84045,
+        "incremental_per_1000_eligible": 0.3433070796668912,
+        "incremental_per_1000_targeted": 1.1443528474222133,
+        "ci_95_low": 0.06362549692717873,
+        "ci_95_high": 0.6229886624066037,
+        "random_policy_per_1000_eligible": 0.29564680975743884
+      },
+      {
+        "fraction": 0.3499994645706392,
+        "selected_rows": 98052,
+        "incremental_per_1000_eligible": 0.38576090574486854,
+        "incremental_per_1000_targeted": 1.102175702520287,
+        "ci_95_low": 0.08694663109072759,
+        "ci_95_high": 0.6845751803990094,
+        "random_policy_per_1000_eligible": 0.3449195191901528
+      },
+      {
+        "fraction": 0.4000014278116288,
+        "selected_rows": 112060,
+        "incremental_per_1000_eligible": 0.42100511900011617,
+        "incremental_per_1000_targeted": 1.052509040538672,
+        "ci_95_low": 0.10032114170915502,
+        "ci_95_high": 0.7416890962910774,
+        "random_policy_per_1000_eligible": 0.3941957463432518
+      },
+      {
+        "fraction": 0.4499998215235464,
+        "selected_rows": 126067,
+        "incremental_per_1000_eligible": 0.4227000252582365,
+        "incremental_per_1000_targeted": 0.9393337620159896,
+        "ci_95_low": 0.08233793560783664,
+        "ci_95_high": 0.7630621149086364,
+        "random_policy_per_1000_eligible": 0.4434684557759657
+      },
+      {
+        "fraction": 0.499998215235464,
+        "selected_rows": 140074,
+        "incremental_per_1000_eligible": 0.5184937612799936,
+        "incremental_per_1000_targeted": 1.036991224130309,
+        "ci_95_low": 0.16469035539836446,
+        "ci_95_high": 0.8722971671616226,
+        "random_policy_per_1000_eligible": 0.4927411652086797
+      },
+      {
+        "fraction": 0.5500001784764535,
+        "selected_rows": 154082,
+        "incremental_per_1000_eligible": 0.5591093518364346,
+        "incremental_per_1000_targeted": 1.0165621280073296,
+        "ci_95_low": 0.1830673527260101,
+        "ci_95_high": 0.9351513509468592,
+        "random_policy_per_1000_eligible": 0.5420173923617787
+      },
+      {
+        "fraction": 0.5999985721883712,
+        "selected_rows": 168089,
+        "incremental_per_1000_eligible": 0.5619819720211073,
+        "incremental_per_1000_targeted": 0.9366388489415798,
+        "ci_95_low": 0.16571079864005012,
+        "ci_95_high": 0.9582531454021646,
+        "random_policy_per_1000_eligible": 0.5912901017944926
+      },
+      {
+        "fraction": 0.6500005354293608,
+        "selected_rows": 182097,
+        "incremental_per_1000_eligible": 0.5522736020818572,
+        "incremental_per_1000_targeted": 0.849650995621181,
+        "ci_95_low": 0.1370006613155244,
+        "ci_95_high": 0.96754654284819,
+        "random_policy_per_1000_eligible": 0.6405663289475917
+      },
+      {
+        "fraction": 0.6999989291412784,
+        "selected_rows": 196104,
+        "incremental_per_1000_eligible": 0.6229053578557686,
+        "incremental_per_1000_targeted": 0.8898661582524361,
+        "ci_95_low": 0.19702174012644197,
+        "ci_95_high": 1.0487889755850952,
+        "random_policy_per_1000_eligible": 0.6898390383803056
+      },
+      {
+        "fraction": 0.750000892382268,
+        "selected_rows": 210112,
+        "incremental_per_1000_eligible": 0.6886829286600551,
+        "incremental_per_1000_targeted": 0.9182428123152688,
+        "ci_95_low": 0.24369712705812013,
+        "ci_95_high": 1.13366873026199,
+        "random_policy_per_1000_eligible": 0.7391152655334046
+      },
+      {
+        "fraction": 0.7999992860941856,
+        "selected_rows": 224119,
+        "incremental_per_1000_eligible": 0.6850064576169821,
+        "incremental_per_1000_targeted": 0.8562588361314297,
+        "ci_95_low": 0.22856600314241998,
+        "ci_95_high": 1.1414469120915443,
+        "random_policy_per_1000_eligible": 0.7883879749661185
+      },
+      {
+        "fraction": 0.8500012493351752,
+        "selected_rows": 238127,
+        "incremental_per_1000_eligible": 0.7244443342468709,
+        "incremental_per_1000_targeted": 0.8522861993596973,
+        "ci_95_low": 0.25332511581228223,
+        "ci_95_high": 1.1955635526814596,
+        "random_policy_per_1000_eligible": 0.8376642021192175
+      },
+      {
+        "fraction": 0.8999996430470928,
+        "selected_rows": 252134,
+        "incremental_per_1000_eligible": 0.8891749197844191,
+        "incremental_per_1000_targeted": 0.9879725249378709,
+        "ci_95_low": 0.4125202988578279,
+        "ci_95_high": 1.3658295407110104,
+        "random_policy_per_1000_eligible": 0.8869369115519314
+      },
+      {
+        "fraction": 0.9500016062880824,
+        "selected_rows": 266142,
+        "incremental_per_1000_eligible": 0.9190477557384734,
+        "incremental_per_1000_targeted": 0.9674170545136714,
+        "ci_95_low": 0.43112889299662993,
+        "ci_95_high": 1.406966618480317,
+        "random_policy_per_1000_eligible": 0.9362131387050305
+      },
+      {
+        "fraction": 1.0,
+        "selected_rows": 280149,
+        "incremental_per_1000_eligible": 0.9854858481377444,
+        "incremental_per_1000_targeted": 0.9854858481377444,
+        "ci_95_low": 0.48857348060769235,
+        "ci_95_high": 1.4823982156677964,
+        "random_policy_per_1000_eligible": 0.9854858481377444
+      }
+    ]
+  },
+  "calibration": [
+    {
+      "rank": 1,
+      "rows": 28015,
+      "predicted_uplift": 0.008031007052859146,
+      "realized_uplift": 0.008809277778012398
+    },
+    {
+      "rank": 2,
+      "rows": 28015,
+      "predicted_uplift": 0.0006955360905730217,
+      "realized_uplift": 0.00020824913274655242
+    },
+    {
+      "rank": 3,
+      "rows": 28015,
+      "predicted_uplift": 0.00040437569512837544,
+      "realized_uplift": 0.0005569513899146639
+    },
+    {
+      "rank": 4,
+      "rows": 28015,
+      "predicted_uplift": 0.00031117075078637165,
+      "realized_uplift": 0.00017952303343847238
+    },
+    {
+      "rank": 5,
+      "rows": 28014,
+      "predicted_uplift": 0.00026346622784881074,
+      "realized_uplift": -0.000509861200586155
+    },
+    {
+      "rank": 6,
+      "rows": 28015,
+      "predicted_uplift": 0.00019406026560338553,
+      "realized_uplift": 0.00033549187242328134
+    },
+    {
+      "rank": 7,
+      "rows": 28015,
+      "predicted_uplift": 0.0001559598689180826,
+      "realized_uplift": 8.387296810582033e-05
+    },
+    {
+      "rank": 8,
+      "rows": 28015,
+      "predicted_uplift": 0.00014117233162563742,
+      "realized_uplift": -0.00015596883898480896
+    },
+    {
+      "rank": 9,
+      "rows": 28015,
+      "predicted_uplift": 0.00012880793461798754,
+      "realized_uplift": 0.0001258094521587305
+    },
+    {
+      "rank": 10,
+      "rows": 28015,
+      "predicted_uplift": 0.00010832261900658024,
+      "realized_uplift": 0.00022145951749138253
+    }
+  ],
+  "policy_comparison_at_selected_reach": {
+    "uplift_vs_propensity": {
+      "first_policy": "uplift",
+      "second_policy": "conversion_propensity",
+      "fraction": 0.19999714437674238,
+      "selected_rows_per_policy": 56029,
+      "overlap_rows": 45102,
+      "difference_per_1000_eligible": -0.04730801104760236,
+      "standard_error": 0.04653391393496601,
+      "ci_95_low": -0.13851280641982228,
+      "ci_95_high": 0.04389678432461757,
+      "clear_first_policy_advantage": false,
+      "clear_second_policy_advantage": false
+    },
+    "uplift_vs_random": {
+      "first_policy": "uplift",
+      "second_policy": "random_targeting",
+      "fraction": 0.19999714437674238,
+      "selected_rows_per_policy": 56029,
+      "overlap_rows": 11211,
+      "difference_per_1000_eligible": 0.6133403171799344,
+      "standard_error": 0.2217828186659535,
+      "ci_95_low": 0.17865398020488793,
+      "ci_95_high": 1.048026654154981,
+      "clear_first_policy_advantage": true,
+      "clear_second_policy_advantage": false
+    },
+    "conclusion": "no_clear_uplift_propensity_winner",
+    "recommendation": "Run uplift and propensity policies head-to-head at equal reach in a new randomized experiment; retain random holdout traffic."
+  },
+  "default_scenario": {
+    "inputs": {
+      "population": 1000000,
+      "contact_cost": 0.08,
+      "conversion_value": 120.0,
+      "max_reach": 0.5
+    },
+    "validation_optimized_policy": {
+      "fraction": 0.19999856816603548,
+      "targeted_customers": 199999,
+      "incremental_conversions": 1426.1049482357723,
+      "incremental_conversions_ci_95_low": 989.8122707228898,
+      "incremental_conversions_ci_95_high": 1862.3976257486552,
+      "campaign_cost": 15999.92,
+      "scenario_profit": 155132.67378829265,
+      "break_even_contact_cost": 0.8556672472776997,
+      "recommendation": "controlled_rollout",
+      "interpretation": "Scenario value is positive; validate with a permanent randomized holdout."
+    },
+    "locked_test_result_at_selected_reach": {
+      "fraction": 0.2000007139058144,
+      "targeted_customers": 200001,
+      "incremental_conversions": 901.7559099083418,
+      "incremental_conversions_ci_95_low": 424.88905588918425,
+      "incremental_conversions_ci_95_high": 1378.6227639274996,
+      "campaign_cost": 16000.08,
+      "scenario_profit": 92210.62918900102,
+      "break_even_contact_cost": 0.5410508406908017
+    },
+    "monetary_values_are_user_defined_scenarios": true
+  },
+  "limitations": [
+    "The dataset contains anonymized features, so the project cannot prescribe operational feature definitions.",
+    "Financial values are user-supplied scenarios; the dataset contains no revenue or campaign cost.",
+    "Offline policy estimates require confirmation in a new randomized experiment.",
+    "The dataset license is non-commercial and separate from the MIT-licensed project code.",
+    "No demographic attributes are available, so demographic fairness is not evaluated."
+  ]
+}

@@ -479,7 +479,14 @@ pre {
 @media (max-width: 480px) {
   .topbar { grid-template-columns: 1fr; }
   .github-link { justify-self: start; }
-  .nav { grid-column: 1; gap: 19px; }
+  .nav {
+    grid-column: 1;
+    flex-wrap: wrap;
+    gap: 7px 18px;
+    overflow: visible;
+    padding-top: 8px;
+  }
+  .nav-link { padding-bottom: 5px; font-size: 0.85rem; }
   .brand small { display: none; }
   .metrics-grid, .metrics-grid.three { grid-template-columns: 1fr; }
   .metric, .metric:first-child, .metric:nth-child(odd) {

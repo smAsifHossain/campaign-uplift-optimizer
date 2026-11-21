@@ -9,6 +9,38 @@ const currency2 = new Intl.NumberFormat("en-US", { style: "currency", currency: 
 const percent = (value, digits = 2) => `${(100 * value).toFixed(digits)}%`;
 const signed = (value, digits = 3) => `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
 const titleCase = (value) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+function savedTheme() {
+  try {
+    return localStorage.getItem("campaign-uplift-theme");
+  } catch (error) {
+    return null;
+  }
+}
+
+function updateThemeControl() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  const button = $("#theme-toggle");
+  const label = $("#theme-toggle-label");
+  if (!button || !label) return;
+  label.textContent = dark ? "Light mode" : "Dark mode";
+  button.setAttribute("aria-label", dark ? "Use light theme" : "Use dark theme");
+  $("#theme-color").setAttribute("content", dark ? "#111512" : "#f7f7f4");
+}
+
+function applyTheme(theme, persist = true) {
+  document.documentElement.dataset.theme = theme;
+  if (persist) {
+    try {
+      localStorage.setItem("campaign-uplift-theme", theme);
+    } catch (error) {
+      // The theme still applies for this visit when storage is unavailable.
+    }
+  }
+  updateThemeControl();
+  if (state.results) renderChartsForView(state.currentView);
+}
 
 function themeColor(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -198,6 +230,7 @@ function renderResults(results) {
   const scenario = results.default_scenario.locked_test_result_at_selected_reach;
   const comparison = results.policy_comparison_at_selected_reach;
   const paired = comparison.uplift_vs_propensity;
+  const upliftVsRandom = comparison.uplift_vs_random;
   $("#overview-model").textContent = titleCase(results.selection.selected_model);
   $("#overview-reach").textContent = percent(results.selection.selected_reach_on_validation, 0);
   $("#overview-profit").textContent = currency.format(scenario.scenario_profit);
@@ -210,6 +243,33 @@ function renderResults(results) {
   $("#metric-ate-ci").textContent = `95% CI ${percent(experiment.ci_95_low, 3)} to ${percent(experiment.ci_95_high, 3)}`;
   $("#metric-incremental").textContent = signed(scenario.incremental_conversions, 1);
   $("#metric-auuc").textContent = decimal.format(selected.test_auuc_above_random);
+
+  $("#data-source-rows").textContent = number.format(results.source.rows_scanned);
+  $("#data-sample-rows").textContent = number.format(results.dataset.overall.rows);
+  $("#data-missing-values").textContent = number.format(results.dataset.overall.missing_values);
+
+  $("#method-source-rows").textContent = number.format(results.source.rows_scanned);
+  $("#method-sample-rows").textContent = number.format(results.dataset.overall.rows);
+  $("#method-missing-values").textContent = number.format(results.dataset.overall.missing_values);
+  $("#split-train-rows").textContent = number.format(results.dataset.train.rows);
+  $("#split-validation-rows").textContent = number.format(results.dataset.validation.rows);
+  $("#split-test-rows").textContent = number.format(results.dataset.test.rows);
+  $("#method-treatment-rate").textContent = percent(experiment.treated_conversion_rate, 3);
+  $("#method-control-rate").textContent = percent(experiment.control_conversion_rate, 3);
+  $("#method-ate").textContent = percent(experiment.absolute_effect, 3);
+  $("#method-ate-ci").textContent = `${percent(experiment.ci_95_low, 3)} to ${percent(experiment.ci_95_high, 3)}`;
+  $("#method-selected-model").textContent = titleCase(results.selection.selected_model);
+  $("#method-selected-reach").textContent = percent(results.selection.selected_reach_on_validation, 0);
+  $("#method-test-auuc").textContent = decimal.format(selected.test_auuc_above_random);
+  $("#method-incremental").textContent = signed(scenario.incremental_conversions, 1);
+  $("#method-scenario-profit").textContent = currency.format(scenario.scenario_profit);
+  $("#method-policy-conclusion").textContent = paired.clear_first_policy_advantage
+    ? "Uplift clearly outperformed propensity at equal reach."
+    : paired.clear_second_policy_advantage
+      ? "Propensity clearly outperformed uplift at equal reach."
+      : upliftVsRandom.clear_first_policy_advantage
+        ? "Uplift clearly beat random targeting, while its difference from propensity was inconclusive."
+        : "The comparison did not establish a clear policy winner.";
 
   $("#experiment-control-rate").textContent = percent(experiment.control_conversion_rate, 3);
   $("#experiment-treatment-rate").textContent = percent(experiment.treated_conversion_rate, 3);
@@ -254,6 +314,9 @@ async function initialize() {
 
 $$('.nav-link').forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
 $$('[data-go]').forEach((button) => button.addEventListener("click", () => showView(button.dataset.go)));
+$("#theme-toggle").addEventListener("click", () => {
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+});
 ['population-input', 'reach-input', 'cost-input', 'value-input'].forEach((id) => {
   $(`#${id}`).addEventListener("input", renderOptimizer);
 });
@@ -261,6 +324,9 @@ window.addEventListener("hashchange", () => {
   const requested = location.hash.slice(1);
   if (requested && requested !== state.currentView) showView(requested, false);
 });
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => renderChartsForView(state.currentView));
+systemTheme.addEventListener("change", (event) => {
+  if (!savedTheme()) applyTheme(event.matches ? "dark" : "light", false);
+});
 
+updateThemeControl();
 initialize();

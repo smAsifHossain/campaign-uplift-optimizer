@@ -4,9 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Causal uplift modeling and campaign budget optimization on randomized advertising data.">
-    <meta name="theme-color" content="#f7f7f4">
+    <meta id="theme-color" name="theme-color" content="#f7f7f4">
     <title>Campaign Uplift Optimizer</title>
-    <link rel="stylesheet" href="styles.css?v=20261120-2">
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("campaign-uplift-theme");
+          const preferred = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          document.documentElement.dataset.theme = saved || preferred;
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="styles.css?v=20261121-1">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -24,7 +35,10 @@
         <button class="nav-link" data-view="optimizer" type="button">Budget optimizer</button>
         <button class="nav-link" data-view="methodology" type="button">Methodology</button>
       </nav>
-      <a class="github-link" href="https://github.com/smAsifHossain/campaign-uplift-optimizer" target="_blank" rel="noreferrer">GitHub repository</a>
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Use dark theme"><span id="theme-toggle-label">Dark mode</span></button>
+        <a class="github-link" href="https://github.com/smAsifHossain/campaign-uplift-optimizer" target="_blank" rel="noreferrer">GitHub repository</a>
+      </div>
     </header>
 
     <div id="status-banner" class="status-banner" hidden></div>
@@ -65,6 +79,31 @@
           <article class="metric"><span>Estimated incremental conversions</span><strong id="metric-incremental">—</strong><small>Per 1M eligible at selected reach</small></article>
           <article class="metric"><span>Ranking value on test</span><strong id="metric-auuc">—</strong><small>AUUC above a random policy</small></article>
         </div>
+
+        <section class="data-brief section-gap" aria-labelledby="data-brief-title">
+          <div class="data-brief-intro">
+            <p class="eyebrow">About the data</p>
+            <h2 id="data-brief-title">Criteo Uplift Prediction Dataset v2.1</h2>
+            <p>Each row is one anonymized observation from a randomized advertising incrementality test. Treatment records were assigned to advertising; control records were held back. The dataset contains no names, contact details, ad creative, product identity, or revenue.</p>
+            <p class="supporting">Conversion is the primary outcome and visit is a secondary outcome. Raw records are not redistributed in this repository.</p>
+            <a class="text-link" href="https://ailab.criteo.com/criteo-uplift-prediction-dataset/" target="_blank" rel="noreferrer">Publisher, documentation and license</a>
+          </div>
+          <dl class="data-facts" aria-label="Dataset scale">
+            <div><dt>Full source scanned</dt><dd id="data-source-rows">—</dd><small>Official archive rows</small></div>
+            <div><dt>Analysis sample</dt><dd id="data-sample-rows">—</dd><small>Seeded 10% sample</small></div>
+            <div><dt>Missing values</dt><dd id="data-missing-values">—</dd><small>Across the analysis sample</small></div>
+          </dl>
+          <div class="field-guide">
+            <h3>What each row contains</h3>
+            <dl>
+              <div><dt>f0–f11</dt><dd>Twelve anonymized customer or context features used by the models.</dd></div>
+              <div><dt>treatment</dt><dd>Whether the observation was assigned to advertising or control.</dd></div>
+              <div><dt>exposure</dt><dd>Whether advertising exposure was recorded for the treatment observation.</dd></div>
+              <div><dt>visit</dt><dd>Whether a website visit occurred.</dd></div>
+              <div><dt>conversion</dt><dd>Whether the primary conversion outcome occurred.</dd></div>
+            </dl>
+          </div>
+        </section>
 
         <div class="two-column section-gap">
           <article class="panel chart-panel">
@@ -157,14 +196,91 @@
       </section>
 
       <section id="view-methodology" class="view" data-page="methodology" hidden>
-        <header class="page-header"><p class="eyebrow">Methodology</p><h1>How the analysis was built</h1><p>Every published number is generated from versioned code, validated artifacts, and a documented evaluation contract.</p></header>
+        <header class="page-header"><p class="eyebrow">Methodology</p><h1>From randomized data to a campaign decision</h1><p>This analysis separates data preparation, experimental measurement, model selection, final evaluation, and business assumptions so each claim can be traced to its evidence.</p></header>
         <div class="pipeline" aria-label="Analysis workflow">
-          <div><h2>Acquire</h2><p>Official Criteo v2.1 archive, source attribution, checksum and schema validation.</p></div>
-          <div><h2>Split</h2><p>Stable feature hashing prevents identical covariate groups crossing data splits.</p></div>
-          <div><h2>Select</h2><p>Causal candidates compete on validation AUUC above a random policy.</p></div>
-          <div><h2>Evaluate</h2><p>One locked test set produces policy curves, uncertainty and calibration.</p></div>
-          <div><h2>Decide</h2><p>Scenario economics combine incremental effect, reach, cost and value.</p></div>
+          <div><h2>Data</h2><p>Verify the official source and build a reproducible analytical sample.</p></div>
+          <div><h2>Split</h2><p>Keep identical feature vectors together across train, validation, and test.</p></div>
+          <div><h2>Experiment</h2><p>Measure the average randomized treatment effect before modeling.</p></div>
+          <div><h2>Model</h2><p>Compare causal rankings on validation data using policy value.</p></div>
+          <div><h2>Decide</h2><p>Report locked-test evidence and translate lift into scenario economics.</p></div>
         </div>
+
+        <div class="method-details section-gap">
+          <article class="method-step">
+            <header><p class="eyebrow">Data and quality</p><h2>Verify the source before analysis</h2></header>
+            <div class="method-copy">
+              <dl class="method-points">
+                <div><dt>What was done</dt><dd>The official compressed archive was pinned to a source commit, checked against its expected byte size and SHA-256 checksum, opened to verify gzip integrity, and required to contain all sixteen expected columns. Treatment, conversion, and visit were validated as binary fields.</dd></div>
+                <div><dt>Why it matters</dt><dd>These checks prevent a partial, altered, or structurally incompatible file from silently entering the analysis.</dd></div>
+                <div><dt>Result</dt><dd><span id="method-source-rows">—</span> source rows were scanned. A deterministic 10% sample produced <span id="method-sample-rows">—</span> observations with <span id="method-missing-values">—</span> missing values.</dd></div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="method-step">
+            <header><p class="eyebrow">Data preparation</p><h2>Separate learning, selection, and final reporting</h2></header>
+            <div class="method-copy">
+              <p>The twelve anonymized feature values are hashed together. Every identical feature vector receives the same hash bucket, so matching covariate groups stay in one split and cannot leak across boundaries.</p>
+              <div class="table-wrap split-table-wrap">
+                <table class="split-table">
+                  <thead><tr><th>Split</th><th>Rows</th><th>Share</th><th>Used for</th></tr></thead>
+                  <tbody>
+                    <tr><td>Training</td><td id="split-train-rows" class="numeric">—</td><td>60%</td><td>Fit the candidate models</td></tr>
+                    <tr><td>Validation</td><td id="split-validation-rows" class="numeric">—</td><td>20%</td><td>Select the causal model and campaign reach</td></tr>
+                    <tr><td>Locked test</td><td id="split-test-rows" class="numeric">—</td><td>20%</td><td>Produce final evidence once</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+
+          <article class="method-step">
+            <header><p class="eyebrow">Randomized experiment</p><h2>Establish whether advertising worked on average</h2></header>
+            <div class="method-copy">
+              <dl class="method-points">
+                <div><dt>What was done</dt><dd>The observed conversion rate for randomized treatment records was compared with the rate for control records. No predictive model is needed for this comparison because treatment assignment is supplied by the experiment.</dd></div>
+                <div><dt>Why it matters</dt><dd>The average treatment effect is the causal benchmark that every targeting policy must remain consistent with at full reach.</dd></div>
+                <div><dt>Result</dt><dd>Treatment conversion was <span id="method-treatment-rate">—</span> versus <span id="method-control-rate">—</span> in control. The absolute effect was <span id="method-ate">—</span>, with a 95% confidence interval of <span id="method-ate-ci">—</span>.</dd></div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="method-step">
+            <header><p class="eyebrow">Modeling and selection</p><h2>Rank customers by incremental response</h2></header>
+            <div class="method-copy">
+              <dl class="method-points">
+                <div><dt>What was done</dt><dd>Three auditable causal candidates were trained: a regularized logistic T-Learner, a boosted T-Learner, and a boosted S-Learner. A conversion-propensity model and random targeting provide non-causal comparison policies.</dd></div>
+                <div><dt>How selection worked</dt><dd>Each candidate ranked the validation set. AUUC above random measures the incremental conversions accumulated as more of that ranked audience is targeted. Higher validation AUUC indicates a more useful causal ranking.</dd></div>
+                <div><dt>Result</dt><dd><span id="method-selected-model">—</span> was selected among the causal candidates. Validation data also selected a <span id="method-selected-reach">—</span> campaign reach.</dd></div>
+              </dl>
+              <button class="text-action" type="button" data-go="models">See every model result</button>
+            </div>
+          </article>
+
+          <article class="method-step">
+            <header><p class="eyebrow">Locked-test evaluation</p><h2>Measure policy value on unseen data</h2></header>
+            <div class="method-copy">
+              <dl class="method-points">
+                <div><dt>What was reported</dt><dd>The selected model scored the locked test set once. Randomized treatment assignments support policy curves, 95% uncertainty intervals, calibration by uplift rank, and paired comparisons against propensity and random targeting.</dd></div>
+                <div><dt>Why it matters</dt><dd>This evaluates the targeting decision itself: whether customers ranked near the top actually show more incremental response on unseen experimental data.</dd></div>
+                <div><dt>Result</dt><dd>Test AUUC above random was <span id="method-test-auuc">—</span>. At the selected reach, the policy estimated <span id="method-incremental">—</span> incremental conversions per one million eligible customers. <span id="method-policy-conclusion">—</span></dd></div>
+              </dl>
+            </div>
+          </article>
+
+          <article class="method-step">
+            <header><p class="eyebrow">Business decision</p><h2>Convert lift into a transparent scenario</h2></header>
+            <div class="method-copy">
+              <dl class="method-points">
+                <div><dt>What was done</dt><dd>The measured policy curve is combined with eligible population, contact cost, conversion value, and maximum reach. Criteo does not supply monetary values, so every dollar figure is explicitly a user-controlled scenario.</dd></div>
+                <div><dt>Calculation</dt><dd>Scenario profit equals estimated incremental conversions multiplied by assumed value per conversion, minus targeted customers multiplied by assumed contact cost.</dd></div>
+                <div><dt>Default scenario</dt><dd>At the validation-selected reach, the locked-test estimate is <span id="method-scenario-profit">—</span> after campaign contact cost. The recommendation remains a controlled rollout with a permanent randomized holdout.</dd></div>
+              </dl>
+              <button class="text-action" type="button" data-go="optimizer">Open the budget optimizer</button>
+            </div>
+          </article>
+        </div>
+
         <div class="two-column section-gap">
           <article class="panel">
             <div class="panel-heading"><div><p class="eyebrow">Reproduce it</p><h2>Core commands</h2></div></div>
@@ -187,6 +303,6 @@ ruff check .</code></pre>
     </main>
 
     <footer class="footer"><span>Analysis and implementation by S M Asif Hossain</span><span>Python · scikit-learn · randomized policy evaluation</span></footer>
-    <script src="app.js?v=20261120-2"></script>
+    <script src="app.js?v=20261121-1"></script>
   </body>
 </html>

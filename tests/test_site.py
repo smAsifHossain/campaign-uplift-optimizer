@@ -36,3 +36,17 @@ def test_pages_workflow_uses_artifact_deployment_not_bot_commits() -> None:
     assert "actions/upload-pages-artifact" in workflow
     assert "actions/deploy-pages" in workflow
     assert "git push" not in workflow
+
+
+def test_site_explains_data_pipeline_and_supports_theme_switching() -> None:
+    html = Path("site/index.html").read_text(encoding="utf-8")
+    css = Path("site/styles.css").read_text(encoding="utf-8")
+    javascript = Path("site/app.js").read_text(encoding="utf-8")
+
+    assert "About the data" in html
+    assert "Data preparation" in html
+    assert "Locked-test evaluation" in html
+    assert "split-train-rows" in html
+    assert "theme-toggle" in html
+    assert 'html[data-theme="dark"]' in css
+    assert "campaign-uplift-theme" in javascript

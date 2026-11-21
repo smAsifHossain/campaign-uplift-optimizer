@@ -48,5 +48,11 @@ def test_site_explains_data_pipeline_and_supports_theme_switching() -> None:
     assert "Locked-test evaluation" in html
     assert "split-train-rows" in html
     assert "theme-toggle" in html
+    assert "data-flow-title" in html
+    assert "experiment-rate-chart" in html
+    assert "policy-advantage-chart" in html
+    assert "https://www.linkedin.com/in/smasifhossain" in html
     assert 'html[data-theme="dark"]' in css
     assert "campaign-uplift-theme" in javascript
+    assert "renderExperimentRateChart" in javascript
+    assert "renderPolicyAdvantageChart" in javascript

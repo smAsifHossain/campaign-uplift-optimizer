@@ -149,6 +149,33 @@ function renderExperimentChart() {
   </svg>`;
 }
 
+function renderExperimentRateChart() {
+  const effect = state.results.experiment;
+  const container = $("#experiment-rate-chart");
+  const rows = [
+    { label: "Treatment", value: effect.treated_conversion_rate, color: themeColor("--accent") },
+    { label: "Control", value: effect.control_conversion_rate, color: themeColor("--muted") },
+  ];
+  const width = 700;
+  const height = 220;
+  const left = 125;
+  const right = 85;
+  const max = Math.max(...rows.map((row) => row.value)) * 1.2;
+  const x = (value) => left + (value / max) * (width - left - right);
+  const ticks = Array.from({ length: 5 }, (_, index) => {
+    const value = (max * index) / 4;
+    return `<line class="chart-grid" x1="${x(value)}" y1="30" x2="${x(value)}" y2="175" />
+      <text class="chart-axis" x="${x(value)}" y="198" text-anchor="middle">${percent(value, 2)}</text>`;
+  }).join("");
+  const bars = rows.map((row, index) => {
+    const y = 58 + index * 70;
+    return `<text class="chart-axis" x="${left - 14}" y="${y + 17}" text-anchor="end">${row.label}</text>
+      <rect x="${left}" y="${y}" width="${Math.max(1, x(row.value) - left)}" height="28" rx="3" fill="${row.color}"><title>${row.label}: ${percent(row.value, 3)}</title></rect>
+      <text class="chart-title" x="${x(row.value) + 10}" y="${y + 19}">${percent(row.value, 3)}</text>`;
+  }).join("");
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Treatment conversion rate ${percent(effect.treated_conversion_rate, 3)} compared with control conversion rate ${percent(effect.control_conversion_rate, 3)}">${ticks}${bars}<text class="chart-axis" x="${width / 2}" y="218" text-anchor="middle">Observed conversion rate</text></svg>`;
+}
+
 function renderModelCharts() {
   const rows = state.results.model_comparison.map((row) => ({
     label: titleCase(row.model),
@@ -162,6 +189,49 @@ function renderModelCharts() {
     { label: "Predicted", points: calibration.map((row) => ({ x: row.rank, y: row.predicted_uplift })), color: themeColor("--accent"), width: 3 },
     { label: "Realized", points: calibration.map((row) => ({ x: row.rank, y: row.realized_uplift })), color: themeColor("--green") },
   ], { xMin: 1, xMax: calibration.length, xTicks: Math.min(5, calibration.length - 1), xFormat: (value) => `${Math.round(value)}`, xLabel: "Uplift rank group (highest first)", yFormat: (value) => percent(value, 2), label: "Predicted and realized uplift by rank group" });
+}
+
+function renderPolicyAdvantageChart() {
+  const comparison = state.results.policy_comparison_at_selected_reach;
+  const rows = [
+    {
+      label: "Uplift vs propensity",
+      difference: comparison.uplift_vs_propensity.difference_per_1000_eligible,
+      low: comparison.uplift_vs_propensity.ci_95_low,
+      high: comparison.uplift_vs_propensity.ci_95_high,
+      color: themeColor("--orange"),
+    },
+    {
+      label: "Uplift vs random",
+      difference: comparison.uplift_vs_random.difference_per_1000_eligible,
+      low: comparison.uplift_vs_random.ci_95_low,
+      high: comparison.uplift_vs_random.ci_95_high,
+      color: themeColor("--green"),
+    },
+  ];
+  const container = $("#policy-advantage-chart");
+  const width = 760;
+  const height = 250;
+  const left = 190;
+  const right = 55;
+  const observedMin = Math.min(0, ...rows.map((row) => row.low));
+  const observedMax = Math.max(0, ...rows.map((row) => row.high));
+  const padding = (observedMax - observedMin || 1) * 0.12;
+  const min = observedMin - padding;
+  const max = observedMax + padding;
+  const x = (value) => left + ((value - min) / (max - min)) * (width - left - right);
+  const ticks = Array.from({ length: 5 }, (_, index) => {
+    const value = min + ((max - min) * index) / 4;
+    return `<line class="chart-grid" x1="${x(value)}" y1="28" x2="${x(value)}" y2="188" />
+      <text class="chart-axis" x="${x(value)}" y="211" text-anchor="middle">${signed(value, 2)}</text>`;
+  }).join("");
+  const marks = rows.map((row, index) => {
+    const y = 78 + index * 78;
+    return `<text class="chart-axis" x="${left - 15}" y="${y + 4}" text-anchor="end">${row.label}</text>
+      <line x1="${x(row.low)}" y1="${y}" x2="${x(row.high)}" y2="${y}" stroke="${row.color}" stroke-width="5" stroke-linecap="round"><title>95% CI ${signed(row.low, 3)} to ${signed(row.high, 3)}</title></line>
+      <circle cx="${x(row.difference)}" cy="${y}" r="7" fill="${themeColor("--surface")}" stroke="${row.color}" stroke-width="4"><title>Difference ${signed(row.difference, 3)}</title></circle>`;
+  }).join("");
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Paired uplift policy differences per 1,000 eligible customers with 95 percent confidence intervals">${ticks}<line x1="${x(0)}" y1="22" x2="${x(0)}" y2="190" stroke="${themeColor("--ink")}" stroke-width="1.5" />${marks}<text class="chart-axis" x="${(left + width - right) / 2}" y="240" text-anchor="middle">Incremental conversions per 1,000 eligible: uplift minus comparison</text></svg>`;
 }
 
 function scenarioRows() {
@@ -213,8 +283,14 @@ function renderOptimizer() {
 
 function renderChartsForView(name) {
   if (name === "overview") renderPolicyChart("#overview-policy-chart");
-  if (name === "experiment") renderExperimentChart();
-  if (name === "models") renderModelCharts();
+  if (name === "experiment") {
+    renderExperimentChart();
+    renderExperimentRateChart();
+  }
+  if (name === "models") {
+    renderModelCharts();
+    renderPolicyAdvantageChart();
+  }
   if (name === "optimizer") renderOptimizer();
 }
 
@@ -247,6 +323,11 @@ function renderResults(results) {
   $("#data-source-rows").textContent = number.format(results.source.rows_scanned);
   $("#data-sample-rows").textContent = number.format(results.dataset.overall.rows);
   $("#data-missing-values").textContent = number.format(results.dataset.overall.missing_values);
+  $("#flow-source-rows").textContent = number.format(results.source.rows_scanned);
+  $("#flow-sample-rows").textContent = number.format(results.dataset.overall.rows);
+  $("#flow-train-rows").textContent = number.format(results.dataset.train.rows);
+  $("#flow-validation-rows").textContent = number.format(results.dataset.validation.rows);
+  $("#flow-test-rows").textContent = number.format(results.dataset.test.rows);
 
   $("#method-source-rows").textContent = number.format(results.source.rows_scanned);
   $("#method-sample-rows").textContent = number.format(results.dataset.overall.rows);

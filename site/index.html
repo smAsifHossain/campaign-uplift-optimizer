@@ -17,7 +17,7 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=20261121-1">
+    <link rel="stylesheet" href="styles.css?v=20261121-2">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -93,6 +93,19 @@
             <div><dt>Analysis sample</dt><dd id="data-sample-rows">—</dd><small>Seeded 10% sample</small></div>
             <div><dt>Missing values</dt><dd id="data-missing-values">—</dd><small>Across the analysis sample</small></div>
           </dl>
+          <div class="data-flow" aria-labelledby="data-flow-title">
+            <h3 id="data-flow-title">How the analytical sample was built</h3>
+            <div class="flow-stages">
+              <div><span>Official archive scanned</span><strong id="flow-source-rows">—</strong></div>
+              <i aria-hidden="true"></i>
+              <div><span>Seeded analysis sample</span><strong id="flow-sample-rows">—</strong></div>
+            </div>
+            <div class="split-bar" role="img" aria-label="Analysis sample split into 60 percent training, 20 percent validation, and 20 percent locked test">
+              <div class="split-train"><span>Training</span><strong id="flow-train-rows">—</strong></div>
+              <div class="split-validation"><span>Validation</span><strong id="flow-validation-rows">—</strong></div>
+              <div class="split-test"><span>Test</span><strong id="flow-test-rows">—</strong></div>
+            </div>
+          </div>
           <div class="field-guide">
             <h3>What each row contains</h3>
             <dl>
@@ -136,17 +149,21 @@
             <div class="panel-heading"><div><p class="eyebrow">Effect estimate</p><h2>Average treatment effect and uncertainty</h2></div></div>
             <div id="experiment-effect-chart" class="chart compact" aria-label="Average treatment effect confidence interval"></div>
           </article>
-          <article class="panel">
-            <div class="panel-heading"><div><p class="eyebrow">Analysis guardrails</p><h2>Evaluation contract</h2></div></div>
-            <dl class="audit-list">
-              <div><dt>Assignment</dt><dd>Randomized treatment/control</dd></div>
-              <div><dt>Split</dt><dd>Feature-grouped 60 / 20 / 20</dd></div>
-              <div><dt>Model selection</dt><dd>Validation AUUC above random</dd></div>
-              <div><dt>Final reporting</dt><dd>Untouched test split</dd></div>
-              <div><dt>Monetary data</dt><dd>Not present; scenario inputs only</dd></div>
-            </dl>
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">Observed outcomes</p><h2>Conversion rate by assignment</h2></div></div>
+            <div id="experiment-rate-chart" class="chart compact" aria-label="Treatment and control conversion rate comparison"></div>
           </article>
         </div>
+        <article class="panel section-gap">
+          <div class="panel-heading"><div><p class="eyebrow">Analysis guardrails</p><h2>Evaluation contract</h2></div></div>
+          <dl class="audit-list audit-list-wide">
+            <div><dt>Assignment</dt><dd>Randomized treatment/control</dd></div>
+            <div><dt>Split</dt><dd>Feature-grouped 60 / 20 / 20</dd></div>
+            <div><dt>Model selection</dt><dd>Validation AUUC above random</dd></div>
+            <div><dt>Final reporting</dt><dd>Untouched test split</dd></div>
+            <div><dt>Monetary data</dt><dd>Not present; scenario inputs only</dd></div>
+          </dl>
+        </article>
       </section>
 
       <section id="view-models" class="view" data-page="models" hidden>
@@ -161,6 +178,13 @@
             <div id="calibration-chart" class="chart" aria-label="Uplift calibration chart"></div>
           </article>
         </div>
+        <article class="panel chart-panel section-gap">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Uncertainty at selected reach</p><h2>Uplift policy advantage</h2></div>
+            <p class="chart-note">Positive values favor uplift. Intervals crossing zero are inconclusive.</p>
+          </div>
+          <div id="policy-advantage-chart" class="chart compact" aria-label="Paired policy differences with 95 percent confidence intervals"></div>
+        </article>
         <article class="panel section-gap">
           <div class="panel-heading"><div><p class="eyebrow">Evidence table</p><h2>Validation and locked-test results</h2></div></div>
           <div class="table-wrap"><table><thead><tr><th>Model</th><th>Role</th><th>Validation AUUC</th><th>Test AUUC</th><th>Decision</th></tr></thead><tbody id="model-table-body"></tbody></table></div>
@@ -302,7 +326,10 @@ ruff check .</code></pre>
       </section>
     </main>
 
-    <footer class="footer"><span>Analysis and implementation by S M Asif Hossain</span><span>Python · scikit-learn · randomized policy evaluation</span></footer>
-    <script src="app.js?v=20261121-1"></script>
+    <footer class="footer">
+      <span class="author-line">Analysis and implementation by <strong>S M Asif Hossain</strong><a class="linkedin-link" href="https://www.linkedin.com/in/smasifhossain" target="_blank" rel="noreferrer" aria-label="S M Asif Hossain on LinkedIn" title="LinkedIn profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.33V8.98h3.42v1.57h.05c.47-.9 1.64-1.86 3.37-1.86 3.6 0 4.27 2.37 4.27 5.46v6.3ZM5.31 7.41a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13Zm1.78 13.04H3.53V8.98h3.56v11.47ZM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.73V1.73C24 .77 23.21 0 22.23 0Z"/></svg><span class="sr-only">LinkedIn profile</span></a></span>
+      <span>Python · scikit-learn · randomized policy evaluation</span>
+    </footer>
+    <script src="app.js?v=20261121-2"></script>
   </body>
 </html>

@@ -725,7 +725,8 @@ pre {
   .primary-action, .secondary-action { width: 100%; }
   .decision-facts div, .audit-list div { grid-template-columns: 1fr; gap: 3px; }
   .decision-facts dd, .audit-list dd { text-align: left; }
-  .chart { min-height: 220px; overflow-x: auto; }
+  .chart { min-height: 220px; overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+  .chart svg { width: 600px; max-width: none; }
   table { min-width: 700px; }
 }
 

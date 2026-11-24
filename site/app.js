@@ -1,240 +1,150 @@
-const state = { results: null, currentView: "overview" };
-
-const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+const $ = (selector) => document.querySelector(selector);
+const state = { results: null };
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
-const decimal = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 });
+const oneDecimal = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const currency2 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const percent = (value, digits = 2) => `${(100 * value).toFixed(digits)}%`;
-const signed = (value, digits = 3) => `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
-const titleCase = (value) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+const systemTheme = matchMedia("(prefers-color-scheme: dark)");
 
 function savedTheme() {
-  try {
-    return localStorage.getItem("campaign-uplift-theme");
-  } catch (error) {
-    return null;
-  }
-}
-
-function updateThemeControl() {
-  const dark = document.documentElement.dataset.theme === "dark";
-  const button = $("#theme-toggle");
-  const label = $("#theme-toggle-label");
-  if (!button || !label) return;
-  const action = dark ? "Use light theme" : "Use dark theme";
-  label.textContent = action;
-  button.setAttribute("aria-label", action);
-  button.setAttribute("title", action);
-  button.setAttribute("aria-pressed", String(dark));
-  $("#theme-color").setAttribute("content", dark ? "#111512" : "#f7f7f4");
-}
-
-function applyTheme(theme, persist = true) {
-  document.documentElement.dataset.theme = theme;
-  if (persist) {
-    try {
-      localStorage.setItem("campaign-uplift-theme", theme);
-    } catch (error) {
-      // The theme still applies for this visit when storage is unavailable.
-    }
-  }
-  updateThemeControl();
-  if (state.results) renderChartsForView(state.currentView);
+  try { return localStorage.getItem("campaign-uplift-theme"); } catch (error) { return null; }
 }
 
 function themeColor(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function showView(name, updateHash = true) {
-  state.currentView = name;
-  $$(".view").forEach((view) => { view.hidden = view.dataset.page !== name; });
-  $$(".nav-link").forEach((button) => button.classList.toggle("active", button.dataset.view === name));
-  if (updateHash) history.replaceState(null, "", `#${name}`);
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  if (state.results) renderChartsForView(name);
+function updateThemeControl() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  const label = dark ? "Use light theme" : "Use dark theme";
+  $("#theme-toggle").setAttribute("aria-label", label);
+  $("#theme-toggle").setAttribute("title", label);
+  $("#theme-toggle").setAttribute("aria-pressed", String(dark));
+  $("#theme-toggle-label").textContent = label;
+  $("#theme-color").setAttribute("content", dark ? "#121713" : "#f4f5f1");
 }
 
-function svgLineChart(container, series, options = {}) {
-  const width = 720;
-  const height = options.compact ? 220 : 300;
-  const margin = { top: 24, right: 24, bottom: 42, left: 64 };
-  const plotWidth = width - margin.left - margin.right;
-  const plotHeight = height - margin.top - margin.bottom;
-  const allPoints = series.flatMap((item) => item.points);
-  const xMin = options.xMin ?? Math.min(...allPoints.map((point) => point.x));
-  const xMax = options.xMax ?? Math.max(...allPoints.map((point) => point.x));
-  let yMin = options.yMin ?? Math.min(0, ...allPoints.map((point) => point.y));
-  let yMax = options.yMax ?? Math.max(0, ...allPoints.map((point) => point.y));
-  if (yMin === yMax) { yMin -= 1; yMax += 1; }
-  const yPadding = (yMax - yMin) * 0.12;
-  yMin -= yPadding;
-  yMax += yPadding;
-  const x = (value) => margin.left + ((value - xMin) / (xMax - xMin || 1)) * plotWidth;
-  const y = (value) => margin.top + (1 - (value - yMin) / (yMax - yMin || 1)) * plotHeight;
-  const xTicks = options.xTicks ?? 5;
-  const yTicks = options.yTicks ?? 4;
-  const grid = [];
-  for (let index = 0; index <= yTicks; index += 1) {
-    const value = yMin + ((yMax - yMin) * index) / yTicks;
-    const yPos = y(value);
-    grid.push(`<line class="chart-grid" x1="${margin.left}" y1="${yPos}" x2="${width - margin.right}" y2="${yPos}" />`);
-    grid.push(`<text class="chart-axis" x="${margin.left - 10}" y="${yPos + 4}" text-anchor="end">${options.yFormat ? options.yFormat(value) : decimal.format(value)}</text>`);
+function applyTheme(theme, persist = true) {
+  document.documentElement.dataset.theme = theme;
+  if (persist) {
+    try { localStorage.setItem("campaign-uplift-theme", theme); } catch (error) { /* Theme persistence is optional. */ }
   }
-  for (let index = 0; index <= xTicks; index += 1) {
-    const value = xMin + ((xMax - xMin) * index) / xTicks;
-    grid.push(`<text class="chart-axis" x="${x(value)}" y="${height - 14}" text-anchor="middle">${options.xFormat ? options.xFormat(value) : decimal.format(value)}</text>`);
-  }
-  const paths = series.map((item) => {
-    const path = item.points.map((point, index) => `${index === 0 ? "M" : "L"}${x(point.x).toFixed(2)} ${y(point.y).toFixed(2)}`).join(" ");
-    return `<path d="${path}" fill="none" stroke="${item.color}" stroke-width="${item.width ?? 2.5}" ${item.dash ? `stroke-dasharray="${item.dash}"` : ""} stroke-linecap="round" stroke-linejoin="round"><title>${item.label}</title></path>`;
-  }).join("");
-  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label ?? "Line chart"}">${grid.join("")}<line class="chart-grid" x1="${margin.left}" y1="${y(0)}" x2="${width - margin.right}" y2="${y(0)}" />${paths}<text class="chart-axis" x="${width / 2}" y="${height - 1}" text-anchor="middle">${options.xLabel ?? ""}</text></svg>`;
+  updateThemeControl();
+  if (state.results) renderCharts();
 }
 
-function svgBarChart(container, rows) {
-  const width = 700;
-  const rowHeight = 44;
-  const height = Math.max(210, rows.length * rowHeight + 58);
-  const left = 190;
-  const right = 36;
-  const values = rows.flatMap((row) => [row.validation ?? 0, row.test ?? 0]);
-  const min = Math.min(0, ...values);
-  const max = Math.max(0, ...values);
-  const span = max - min || 1;
-  const x = (value) => left + ((value - min) / span) * (width - left - right);
-  const zero = x(0);
-  const content = rows.map((row, index) => {
-    const y = 28 + index * rowHeight;
-    const validationX = x(row.validation ?? 0);
-    const testX = x(row.test ?? 0);
-    const validationWidth = Math.abs(validationX - zero);
-    const testWidth = Math.abs(testX - zero);
-    return `<text class="chart-axis" x="${left - 12}" y="${y + 16}" text-anchor="end">${row.label}</text>
-      <rect x="${Math.min(zero, validationX)}" y="${y}" width="${validationWidth}" height="11" rx="3" fill="${themeColor("--muted")}"><title>Validation: ${decimal.format(row.validation ?? 0)}</title></rect>
-      <rect x="${Math.min(zero, testX)}" y="${y + 16}" width="${testWidth}" height="11" rx="3" fill="${row.selected ? themeColor("--accent") : themeColor("--orange")}"><title>Test: ${decimal.format(row.test ?? 0)}</title></rect>`;
-  }).join("");
-  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Validation and test AUUC comparison"><line class="chart-grid" x1="${zero}" y1="12" x2="${zero}" y2="${height - 28}" />${content}<text class="chart-axis" x="${left}" y="${height - 5}">Gray = validation · Color = test</text></svg>`;
+function signed(value, digits = 1) {
+  const formatted = Number(value).toFixed(digits);
+  return value > 0 ? `+${formatted}` : formatted;
 }
 
-function renderPolicyChart(containerId) {
-  const curves = state.results.policy_curves;
-  const convert = (curve, key) => curve.map((point) => ({ x: point.fraction, y: point[key] }));
-  svgLineChart($(containerId), [
-    { label: "Uplift", points: convert(curves.uplift, "incremental_per_1000_eligible"), color: themeColor("--accent"), width: 3 },
-    { label: "Propensity", points: convert(curves.propensity, "incremental_per_1000_eligible"), color: themeColor("--orange") },
-    { label: "Random", points: convert(curves.random, "random_policy_per_1000_eligible"), color: themeColor("--muted"), dash: "6 5", width: 1.5 },
-  ], { xMin: 0, xMax: 1, xFormat: (value) => `${Math.round(value * 100)}%`, xLabel: "Campaign reach", yFormat: (value) => decimal.format(value), label: "Incremental conversions per 1,000 eligible customers by campaign reach" });
+function percent(value, digits = 1) {
+  return `${(value * 100).toFixed(digits)}%`;
 }
 
-function renderExperimentChart() {
+function percentagePoints(value, digits = 3) {
+  return `${signed(value * 100, digits)} pp`;
+}
+
+function displayName(value) {
+  const names = {
+    linear_t_learner: "Linear T-Learner",
+    boosted_t_learner: "Boosted T-Learner",
+    boosted_s_learner: "Boosted S-Learner",
+    conversion_propensity: "Propensity",
+    random_targeting: "Random",
+  };
+  return names[value] || value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function linePath(points, x, y) {
+  return points.map((point, index) => `${index ? "L" : "M"}${x(point.x).toFixed(2)},${y(point.y).toFixed(2)}`).join(" ");
+}
+
+function renderEffectChart() {
   const effect = state.results.experiment;
-  const container = $("#experiment-effect-chart");
-  const width = 700;
-  const height = 220;
-  const left = 80;
-  const right = 50;
-  const low = Math.min(0, effect.ci_95_low) * 1.35;
-  const high = Math.max(0, effect.ci_95_high) * 1.35;
-  const x = (value) => left + ((value - low) / (high - low || 1)) * (width - left - right);
-  const zero = x(0);
-  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Average treatment effect with 95 percent confidence interval">
-    <line class="chart-grid" x1="${zero}" y1="35" x2="${zero}" y2="172" />
-    <line x1="${x(effect.ci_95_low)}" y1="105" x2="${x(effect.ci_95_high)}" y2="105" stroke="${themeColor("--accent")}" stroke-width="5" stroke-linecap="round" />
-    <circle cx="${x(effect.absolute_effect)}" cy="105" r="8" fill="${themeColor("--surface")}" stroke="${themeColor("--accent")}" stroke-width="4" />
-    <text class="chart-title" x="${x(effect.absolute_effect)}" y="78" text-anchor="middle">ATE ${percent(effect.absolute_effect, 3)}</text>
-    <text class="chart-axis" x="${x(effect.ci_95_low)}" y="133" text-anchor="middle">${percent(effect.ci_95_low, 3)}</text>
-    <text class="chart-axis" x="${x(effect.ci_95_high)}" y="133" text-anchor="middle">${percent(effect.ci_95_high, 3)}</text>
-    <text class="chart-axis" x="${zero}" y="193" text-anchor="middle">No effect</text>
-  </svg>`;
-}
-
-function renderExperimentRateChart() {
-  const effect = state.results.experiment;
-  const container = $("#experiment-rate-chart");
-  const rows = [
-    { label: "Treatment", value: effect.treated_conversion_rate, color: themeColor("--accent") },
-    { label: "Control", value: effect.control_conversion_rate, color: themeColor("--muted") },
-  ];
-  const width = 700;
-  const height = 220;
-  const left = 125;
-  const right = 85;
-  const max = Math.max(...rows.map((row) => row.value)) * 1.2;
+  const container = $("#effect-chart");
+  const width = window.innerWidth <= 520 ? 430 : 670;
+  const height = 205;
+  const left = window.innerWidth <= 520 ? 88 : 112;
+  const right = window.innerWidth <= 520 ? 66 : 82;
+  const plotTop = 28;
+  const plotBottom = 145;
+  const max = Math.max(effect.treated_conversion_rate, effect.control_conversion_rate) * 1.25;
   const x = (value) => left + (value / max) * (width - left - right);
   const ticks = Array.from({ length: 5 }, (_, index) => {
     const value = (max * index) / 4;
-    return `<line class="chart-grid" x1="${x(value)}" y1="30" x2="${x(value)}" y2="175" />
-      <text class="chart-axis" x="${x(value)}" y="198" text-anchor="middle">${percent(value, 2)}</text>`;
+    return `<line class="chart-grid" x1="${x(value)}" y1="${plotTop}" x2="${x(value)}" y2="${plotBottom}" />
+      <text class="chart-axis" x="${x(value)}" y="171" text-anchor="middle">${percent(value, 2)}</text>`;
+  }).join("");
+  const rows = [
+    { label: "Treatment", value: effect.treated_conversion_rate, color: themeColor("--accent") },
+    { label: "Control", value: effect.control_conversion_rate, color: themeColor("--line-strong") },
+  ];
+  const bars = rows.map((row, index) => {
+    const y = 48 + index * 55;
+    return `<text class="chart-axis" x="${left - 13}" y="${y + 18}" text-anchor="end">${row.label}</text>
+      <rect x="${left}" y="${y}" width="${Math.max(1, x(row.value) - left)}" height="27" rx="2" fill="${row.color}"><title>${row.label}: ${percent(row.value, 3)}</title></rect>
+      <text class="chart-label" x="${x(row.value) + 9}" y="${y + 18}">${percent(row.value, 3)}</text>`;
+  }).join("");
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Treatment conversion rate ${percent(effect.treated_conversion_rate, 3)} versus control ${percent(effect.control_conversion_rate, 3)}">${ticks}${bars}<text class="chart-label" x="${left}" y="198">ATE ${percentagePoints(effect.absolute_effect)} · 95% CI ${percentagePoints(effect.ci_95_low)} to ${percentagePoints(effect.ci_95_high)}</text></svg>`;
+}
+
+function renderModelChart() {
+  const container = $("#model-chart");
+  const rows = state.results.model_comparison.filter((row) => row.validation_auuc_above_random != null);
+  const labels = {
+    linear_t_learner: "Linear T",
+    boosted_t_learner: "Boosted T",
+    boosted_s_learner: "Boosted S",
+    conversion_propensity: "Propensity",
+  };
+  const width = window.innerWidth <= 520 ? 430 : 670;
+  const height = 205;
+  const left = window.innerWidth <= 520 ? 90 : 118;
+  const right = window.innerWidth <= 520 ? 50 : 62;
+  const max = Math.max(...rows.map((row) => row.validation_auuc_above_random)) * 1.14;
+  const x = (value) => left + (value / max) * (width - left - right);
+  const ticks = Array.from({ length: 5 }, (_, index) => {
+    const value = (max * index) / 4;
+    return `<line class="chart-grid" x1="${x(value)}" y1="18" x2="${x(value)}" y2="170" />
+      <text class="chart-axis" x="${x(value)}" y="194" text-anchor="middle">${value.toFixed(2)}</text>`;
   }).join("");
   const bars = rows.map((row, index) => {
-    const y = 58 + index * 70;
-    return `<text class="chart-axis" x="${left - 14}" y="${y + 17}" text-anchor="end">${row.label}</text>
-      <rect x="${left}" y="${y}" width="${Math.max(1, x(row.value) - left)}" height="28" rx="3" fill="${row.color}"><title>${row.label}: ${percent(row.value, 3)}</title></rect>
-      <text class="chart-title" x="${x(row.value) + 10}" y="${y + 19}">${percent(row.value, 3)}</text>`;
+    const y = 27 + index * 37;
+    const color = row.selected ? themeColor("--accent") : row.category === "predictive_baseline" ? themeColor("--orange") : themeColor("--line-strong");
+    return `<text class="chart-axis" x="${left - 12}" y="${y + 14}" text-anchor="end">${labels[row.model]}</text>
+      <rect x="${left}" y="${y}" width="${Math.max(1, x(row.validation_auuc_above_random) - left)}" height="20" rx="2" fill="${color}"><title>${displayName(row.model)}: ${row.validation_auuc_above_random.toFixed(3)}</title></rect>
+      <text class="chart-label" x="${x(row.validation_auuc_above_random) + 8}" y="${y + 14}">${row.validation_auuc_above_random.toFixed(3)}</text>`;
   }).join("");
-  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Treatment conversion rate ${percent(effect.treated_conversion_rate, 3)} compared with control conversion rate ${percent(effect.control_conversion_rate, 3)}">${ticks}${bars}<text class="chart-axis" x="${width / 2}" y="218" text-anchor="middle">Observed conversion rate</text></svg>`;
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Validation AUUC comparison for candidate models">${ticks}${bars}</svg>`;
 }
 
-function renderModelCharts() {
-  const rows = state.results.model_comparison.map((row) => ({
-    label: titleCase(row.model),
-    validation: row.validation_auuc_above_random,
-    test: row.test_auuc_above_random,
-    selected: row.selected,
-  }));
-  svgBarChart($("#model-comparison-chart"), rows);
-  const calibration = state.results.calibration;
-  svgLineChart($("#calibration-chart"), [
-    { label: "Predicted", points: calibration.map((row) => ({ x: row.rank, y: row.predicted_uplift })), color: themeColor("--accent"), width: 3 },
-    { label: "Realized", points: calibration.map((row) => ({ x: row.rank, y: row.realized_uplift })), color: themeColor("--green") },
-  ], { xMin: 1, xMax: calibration.length, xTicks: Math.min(5, calibration.length - 1), xFormat: (value) => `${Math.round(value)}`, xLabel: "Uplift rank group (highest first)", yFormat: (value) => percent(value, 2), label: "Predicted and realized uplift by rank group" });
-}
-
-function renderPolicyAdvantageChart() {
-  const comparison = state.results.policy_comparison_at_selected_reach;
-  const rows = [
-    {
-      label: "Uplift vs propensity",
-      difference: comparison.uplift_vs_propensity.difference_per_1000_eligible,
-      low: comparison.uplift_vs_propensity.ci_95_low,
-      high: comparison.uplift_vs_propensity.ci_95_high,
-      color: themeColor("--orange"),
-    },
-    {
-      label: "Uplift vs random",
-      difference: comparison.uplift_vs_random.difference_per_1000_eligible,
-      low: comparison.uplift_vs_random.ci_95_low,
-      high: comparison.uplift_vs_random.ci_95_high,
-      color: themeColor("--green"),
-    },
+function renderPolicyChart() {
+  const container = $("#policy-chart");
+  const curves = state.results.policy_curves;
+  const series = [
+    { points: curves.uplift, color: themeColor("--accent"), width: 4 },
+    { points: curves.propensity, color: themeColor("--orange"), width: 3 },
+    { points: curves.random, color: themeColor("--muted"), width: 2.5 },
   ];
-  const container = $("#policy-advantage-chart");
-  const width = 760;
-  const height = 250;
-  const left = 190;
-  const right = 55;
-  const observedMin = Math.min(0, ...rows.map((row) => row.low));
-  const observedMax = Math.max(0, ...rows.map((row) => row.high));
-  const padding = (observedMax - observedMin || 1) * 0.12;
-  const min = observedMin - padding;
-  const max = observedMax + padding;
-  const x = (value) => left + ((value - min) / (max - min)) * (width - left - right);
-  const ticks = Array.from({ length: 5 }, (_, index) => {
-    const value = min + ((max - min) * index) / 4;
-    return `<line class="chart-grid" x1="${x(value)}" y1="28" x2="${x(value)}" y2="188" />
-      <text class="chart-axis" x="${x(value)}" y="211" text-anchor="middle">${signed(value, 2)}</text>`;
-  }).join("");
-  const marks = rows.map((row, index) => {
-    const y = 78 + index * 78;
-    return `<text class="chart-axis" x="${left - 15}" y="${y + 4}" text-anchor="end">${row.label}</text>
-      <line x1="${x(row.low)}" y1="${y}" x2="${x(row.high)}" y2="${y}" stroke="${row.color}" stroke-width="5" stroke-linecap="round"><title>95% CI ${signed(row.low, 3)} to ${signed(row.high, 3)}</title></line>
-      <circle cx="${x(row.difference)}" cy="${y}" r="7" fill="${themeColor("--surface")}" stroke="${row.color}" stroke-width="4"><title>Difference ${signed(row.difference, 3)}</title></circle>`;
-  }).join("");
-  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Paired uplift policy differences per 1,000 eligible customers with 95 percent confidence intervals">${ticks}<line x1="${x(0)}" y1="22" x2="${x(0)}" y2="190" stroke="${themeColor("--ink")}" stroke-width="1.5" />${marks}<text class="chart-axis" x="${(left + width - right) / 2}" y="240" text-anchor="middle">Incremental conversions per 1,000 eligible: uplift minus comparison</text></svg>`;
+  const width = 1050;
+  const height = 300;
+  const left = 62;
+  const right = 30;
+  const top = 25;
+  const bottom = 52;
+  const all = series.flatMap((item) => item.points.map((point) => point.incremental_per_1000_eligible));
+  const min = Math.min(0, ...all);
+  const max = Math.max(...all) * 1.12;
+  const x = (value) => left + value * (width - left - right);
+  const y = (value) => top + ((max - value) / (max - min || 1)) * (height - top - bottom);
+  const yTicks = Array.from({ length: 5 }, (_, index) => min + ((max - min) * index) / 4);
+  const grid = yTicks.map((value) => `<line class="chart-grid" x1="${left}" y1="${y(value)}" x2="${width - right}" y2="${y(value)}" /><text class="chart-axis" x="${left - 10}" y="${y(value) + 4}" text-anchor="end">${value.toFixed(2)}</text>`).join("");
+  const xTicks = [0, 0.2, 0.4, 0.6, 0.8, 1].map((value) => `<text class="chart-axis" x="${x(value)}" y="${height - 22}" text-anchor="middle">${percent(value, 0)}</text>`).join("");
+  const paths = series.map((item) => `<path d="${linePath(item.points.map((point) => ({ x: point.fraction, y: point.incremental_per_1000_eligible })), x, y)}" fill="none" stroke="${item.color}" stroke-width="${item.width}" stroke-linecap="round" stroke-linejoin="round" />`).join("");
+  const selectedReach = state.results.selection.selected_reach_on_validation;
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Uplift, propensity and random targeting policy value by campaign reach">${grid}${xTicks}<line x1="${x(selectedReach)}" y1="${top}" x2="${x(selectedReach)}" y2="${height - bottom}" stroke="${themeColor("--ink")}" stroke-width="1.5" stroke-dasharray="5 5" />${paths}<text class="chart-label" x="${x(selectedReach) + 8}" y="${top + 14}">Selected ${percent(selectedReach, 0)}</text><text class="chart-axis" x="${width / 2}" y="${height - 3}" text-anchor="middle">Campaign reach</text><text class="chart-axis" transform="translate(14 ${height / 2}) rotate(-90)" text-anchor="middle">Incremental conversions / 1,000 eligible</text></svg>`;
 }
 
 function scenarioRows() {
@@ -242,15 +152,40 @@ function scenarioRows() {
   const maxReach = Number($("#reach-input").value) / 100;
   const contactCost = Number($("#cost-input").value) / 100;
   const conversionValue = Number($("#value-input").value);
-  return state.results.policy_curves.uplift.filter((point) => point.fraction <= maxReach + 1e-9).map((point) => {
-    const targeted = Math.round(population * point.fraction);
-    const incremental = population * point.incremental_per_1000_eligible / 1000;
-    const low = population * point.ci_95_low / 1000;
-    const high = population * point.ci_95_high / 1000;
-    const cost = targeted * contactCost;
-    const profit = incremental * conversionValue - cost;
-    return { fraction: point.fraction, targeted, incremental, low, high, profit, breakEven: targeted ? incremental * conversionValue / targeted : 0 };
-  });
+  return state.results.policy_curves.uplift
+    .filter((point) => point.fraction <= maxReach + 1e-9)
+    .map((point) => {
+      const targeted = Math.round(population * point.fraction);
+      const incremental = population * point.incremental_per_1000_eligible / 1000;
+      const low = population * point.ci_95_low / 1000;
+      const high = population * point.ci_95_high / 1000;
+      const profit = incremental * conversionValue - targeted * contactCost;
+      const breakEven = targeted ? incremental * conversionValue / targeted : 0;
+      return { fraction: point.fraction, targeted, incremental, low, high, profit, breakEven };
+    });
+}
+
+function renderOptimizerChart(rows, positive) {
+  const container = $("#optimizer-chart");
+  const width = 760;
+  const height = 210;
+  const left = 67;
+  const right = 25;
+  const top = 18;
+  const bottom = 47;
+  const xMax = Number($("#reach-input").value) / 100;
+  const values = rows.map((row) => row.profit);
+  const min = Math.min(0, ...values);
+  const max = Math.max(0, ...values);
+  const pad = (max - min || 1) * 0.12;
+  const yMin = min - pad;
+  const yMax = max + pad;
+  const x = (value) => left + (value / xMax) * (width - left - right);
+  const y = (value) => top + ((yMax - value) / (yMax - yMin)) * (height - top - bottom);
+  const ticks = Array.from({ length: 4 }, (_, index) => yMin + ((yMax - yMin) * index) / 3);
+  const grid = ticks.map((value) => `<line class="chart-grid" x1="${left}" y1="${y(value)}" x2="${width - right}" y2="${y(value)}" /><text class="chart-axis" x="${left - 8}" y="${y(value) + 4}" text-anchor="end">${currency.format(value)}</text>`).join("");
+  const points = rows.map((row) => ({ x: row.fraction, y: row.profit }));
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Estimated scenario profit by campaign reach">${grid}<line x1="${left}" y1="${y(0)}" x2="${width - right}" y2="${y(0)}" stroke="${themeColor("--line-strong")}" stroke-width="1.5" /><path d="${linePath(points, x, y)}" fill="none" stroke="${positive ? themeColor("--accent") : themeColor("--red")}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" /><text class="chart-axis" x="${left}" y="${height - 17}">5%</text><text class="chart-axis" x="${width - right}" y="${height - 17}" text-anchor="end">${percent(xMax, 0)} reach</text></svg>`;
 }
 
 function renderOptimizer() {
@@ -267,34 +202,25 @@ function renderOptimizer() {
   if (!rows.length) return;
   const best = rows.reduce((winner, row) => row.profit > winner.profit ? row : winner, rows[0]);
   $("#optimizer-targeted").textContent = number.format(best.targeted);
-  $("#optimizer-fraction").textContent = `${Math.round(best.fraction * 100)}% of eligible customers`;
+  $("#optimizer-fraction").textContent = `${percent(best.fraction, 0)} of eligible customers`;
   $("#optimizer-incremental").textContent = signed(best.incremental, 1);
-  $("#optimizer-conversion-ci").textContent = `95% interval: ${signed(best.low, 1)} to ${signed(best.high, 1)}`;
+  $("#optimizer-conversion-ci").textContent = `95% interval ${signed(best.low, 1)} to ${signed(best.high, 1)}`;
   $("#optimizer-profit").textContent = currency.format(best.profit);
-  $("#optimizer-break-even").textContent = `Break-even contact cost: ${currency2.format(best.breakEven)}`;
+  $("#optimizer-break-even").textContent = `Break-even contact cost ${currency2.format(best.breakEven)}`;
   const positive = best.profit > 0;
-  const decision = $("#optimizer-decision");
-  decision.classList.toggle("negative", !positive);
-  $("#optimizer-decision-title").textContent = positive ? "Run a controlled rollout" : "Do not launch at this cost";
+  $(".output-verdict").classList.toggle("negative", !positive);
+  $("#optimizer-decision-title").textContent = positive ? percent(best.fraction, 0) : "Do not launch";
   $("#optimizer-decision-copy").textContent = positive
-    ? "The scenario is positive at the selected reach. Preserve a randomized holdout to verify the policy online."
-    : "No evaluated reach is profitable under these assumptions. Reduce contact cost or revise campaign value.";
-  svgLineChart($("#optimizer-chart"), [
-    { label: "Scenario profit", points: rows.map((row) => ({ x: row.fraction, y: row.profit })), color: positive ? themeColor("--green") : themeColor("--red"), width: 3 },
-  ], { xMin: 0, xMax: maxReach / 100, xFormat: (value) => `${Math.round(value * 100)}%`, xLabel: "Campaign reach", yFormat: (value) => currency.format(value), label: "Scenario profit by campaign reach" });
+    ? "Highest estimated profit within the reach limit. Keep a randomized holdout during rollout."
+    : "No evaluated reach is profitable under these assumptions.";
+  renderOptimizerChart(rows, positive);
 }
 
-function renderChartsForView(name) {
-  if (name === "overview") renderPolicyChart("#overview-policy-chart");
-  if (name === "experiment") {
-    renderExperimentChart();
-    renderExperimentRateChart();
-  }
-  if (name === "models") {
-    renderModelCharts();
-    renderPolicyAdvantageChart();
-  }
-  if (name === "optimizer") renderOptimizer();
+function renderCharts() {
+  renderEffectChart();
+  renderModelChart();
+  renderPolicyChart();
+  renderOptimizer();
 }
 
 function renderResults(results) {
@@ -302,93 +228,41 @@ function renderResults(results) {
   if (results.status !== "portfolio_real_data") {
     const banner = $("#status-banner");
     banner.hidden = false;
-    banner.textContent = "Development build: these results use explicitly labeled synthetic data and are not portfolio findings.";
+    banner.textContent = "Development build: these results use labeled synthetic data and are not portfolio findings.";
   }
   const experiment = results.experiment;
-  const selected = results.model_comparison.find((row) => row.selected);
   const scenario = results.default_scenario.locked_test_result_at_selected_reach;
-  const comparison = results.policy_comparison_at_selected_reach;
-  const paired = comparison.uplift_vs_propensity;
-  const upliftVsRandom = comparison.uplift_vs_random;
-  $("#overview-model").textContent = titleCase(results.selection.selected_model);
-  $("#overview-reach").textContent = percent(results.selection.selected_reach_on_validation, 0);
-  $("#overview-profit").textContent = currency.format(scenario.scenario_profit);
-  $("#overview-decision-title").textContent = scenario.scenario_profit > 0 ? "Controlled rollout" : "Do not launch";
-  $("#overview-decision-copy").textContent = scenario.scenario_profit > 0
-    ? "Offline value is positive under the default assumptions. Uplift did not clearly beat propensity, so validate both policies head-to-head."
-    : "The selected policy is not profitable under the default assumptions.";
-  $("#metric-test-rows").textContent = number.format(results.dataset.test.rows);
-  $("#metric-ate").textContent = percent(experiment.absolute_effect, 3);
-  $("#metric-ate-ci").textContent = `95% CI ${percent(experiment.ci_95_low, 3)} to ${percent(experiment.ci_95_high, 3)}`;
-  $("#metric-incremental").textContent = signed(scenario.incremental_conversions, 1);
-  $("#metric-auuc").textContent = decimal.format(selected.test_auuc_above_random);
-
+  const reach = results.selection.selected_reach_on_validation;
+  $("#hero-reach").textContent = percent(reach, 0);
+  $("#hero-model").textContent = displayName(results.selection.selected_model);
+  $("#hero-profit").textContent = currency.format(scenario.scenario_profit);
+  $("#kpi-test-rows").textContent = number.format(results.dataset.test.rows);
+  $("#kpi-ate").textContent = percentagePoints(experiment.absolute_effect);
+  $("#kpi-ate-ci").textContent = `95% CI ${percentagePoints(experiment.ci_95_low)} to ${percentagePoints(experiment.ci_95_high)}`;
+  $("#kpi-incremental").textContent = signed(scenario.incremental_conversions, 1);
+  $("#kpi-reach").textContent = percent(reach, 0);
   $("#data-source-rows").textContent = number.format(results.source.rows_scanned);
   $("#data-sample-rows").textContent = number.format(results.dataset.overall.rows);
   $("#data-missing-values").textContent = number.format(results.dataset.overall.missing_values);
-  $("#flow-source-rows").textContent = number.format(results.source.rows_scanned);
-  $("#flow-sample-rows").textContent = number.format(results.dataset.overall.rows);
-  $("#flow-train-rows").textContent = number.format(results.dataset.train.rows);
-  $("#flow-validation-rows").textContent = number.format(results.dataset.validation.rows);
-  $("#flow-test-rows").textContent = number.format(results.dataset.test.rows);
-
-  $("#method-source-rows").textContent = number.format(results.source.rows_scanned);
-  $("#method-sample-rows").textContent = number.format(results.dataset.overall.rows);
-  $("#method-missing-values").textContent = number.format(results.dataset.overall.missing_values);
   $("#split-train-rows").textContent = number.format(results.dataset.train.rows);
   $("#split-validation-rows").textContent = number.format(results.dataset.validation.rows);
   $("#split-test-rows").textContent = number.format(results.dataset.test.rows);
-  $("#method-treatment-rate").textContent = percent(experiment.treated_conversion_rate, 3);
-  $("#method-control-rate").textContent = percent(experiment.control_conversion_rate, 3);
-  $("#method-ate").textContent = percent(experiment.absolute_effect, 3);
-  $("#method-ate-ci").textContent = `${percent(experiment.ci_95_low, 3)} to ${percent(experiment.ci_95_high, 3)}`;
-  $("#method-selected-model").textContent = titleCase(results.selection.selected_model);
-  $("#method-selected-reach").textContent = percent(results.selection.selected_reach_on_validation, 0);
-  $("#method-test-auuc").textContent = decimal.format(selected.test_auuc_above_random);
-  $("#method-incremental").textContent = signed(scenario.incremental_conversions, 1);
-  $("#method-scenario-profit").textContent = currency.format(scenario.scenario_profit);
-  $("#method-policy-conclusion").textContent = paired.clear_first_policy_advantage
-    ? "Uplift clearly outperformed propensity at equal reach."
-    : paired.clear_second_policy_advantage
-      ? "Propensity clearly outperformed uplift at equal reach."
-      : upliftVsRandom.clear_first_policy_advantage
-        ? "Uplift clearly beat random targeting, while its difference from propensity was inconclusive."
-        : "The comparison did not establish a clear policy winner.";
-
-  $("#experiment-control-rate").textContent = percent(experiment.control_conversion_rate, 3);
-  $("#experiment-treatment-rate").textContent = percent(experiment.treated_conversion_rate, 3);
-  $("#experiment-relative-lift").textContent = percent(experiment.relative_lift, 1);
-  $("#experiment-control-n").textContent = `${number.format(experiment.control_rows)} control observations`;
-  $("#experiment-treatment-n").textContent = `${number.format(experiment.treated_rows)} treated observations`;
-  $("#experiment-pvalue").textContent = `Two-sided p = ${experiment.p_value_two_sided.toPrecision(3)}`;
-
-  $("#model-table-body").innerHTML = results.model_comparison.map((row) => `<tr>
-    <td>${titleCase(row.model)}</td><td>${titleCase(row.category)}</td>
-    <td class="numeric">${row.validation_auuc_above_random == null ? "—" : decimal.format(row.validation_auuc_above_random)}</td>
-    <td class="numeric">${decimal.format(row.test_auuc_above_random)}</td>
-    <td>${row.selected ? '<span class="selected-chip">Selected on validation</span>' : "Baseline / candidate"}</td>
-  </tr>`).join("");
-  $("#policy-comparison-note").innerHTML = `<strong>Equal-reach paired comparison:</strong> uplift minus propensity is ${signed(paired.difference_per_1000_eligible, 3)} incremental conversions per 1,000 eligible (95% CI ${signed(paired.ci_95_low, 3)} to ${signed(paired.ci_95_high, 3)}). <strong>Conclusion:</strong> ${titleCase(comparison.conclusion)}.`;
   $("#limitations-list").innerHTML = results.limitations.map((item) => `<li>${item}</li>`).join("");
-
   const inputs = results.default_scenario.inputs;
   $("#population-input").value = inputs.population;
   $("#reach-input").value = Math.round(inputs.max_reach * 100);
   $("#cost-input").value = Math.round(inputs.contact_cost * 100);
   $("#value-input").value = inputs.conversion_value;
-  renderChartsForView(state.currentView);
+  renderCharts();
 }
 
 async function initialize() {
   try {
     const response = await fetch("data/results.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const results = await response.json();
+    renderResults(await response.json());
     $("#loading").hidden = true;
-    renderResults(results);
-    const requested = location.hash.slice(1);
-    const valid = ["overview", "experiment", "models", "optimizer", "methodology"];
-    showView(valid.includes(requested) ? requested : "overview", false);
+    $("#site-content").hidden = false;
   } catch (error) {
     console.error(error);
     $("#loading").hidden = true;
@@ -396,20 +270,17 @@ async function initialize() {
   }
 }
 
-$$('.nav-link').forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
-$$('[data-go]').forEach((button) => button.addEventListener("click", () => showView(button.dataset.go)));
 $("#theme-toggle").addEventListener("click", () => {
   applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 });
-['population-input', 'reach-input', 'cost-input', 'value-input'].forEach((id) => {
+["population-input", "reach-input", "cost-input", "value-input"].forEach((id) => {
   $(`#${id}`).addEventListener("input", renderOptimizer);
-});
-window.addEventListener("hashchange", () => {
-  const requested = location.hash.slice(1);
-  if (requested && requested !== state.currentView) showView(requested, false);
 });
 systemTheme.addEventListener("change", (event) => {
   if (!savedTheme()) applyTheme(event.matches ? "dark" : "light", false);
+});
+window.addEventListener("resize", () => {
+  if (state.results) renderCharts();
 });
 
 updateThemeControl();

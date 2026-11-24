@@ -38,22 +38,28 @@ def test_pages_workflow_uses_artifact_deployment_not_bot_commits() -> None:
     assert "git push" not in workflow
 
 
-def test_site_explains_data_pipeline_and_supports_theme_switching() -> None:
+def test_site_is_a_compact_single_page_with_data_method_and_theme_switching() -> None:
     html = Path("site/index.html").read_text(encoding="utf-8")
     css = Path("site/styles.css").read_text(encoding="utf-8")
     javascript = Path("site/app.js").read_text(encoding="utf-8")
 
-    assert "About the data" in html
-    assert "Data preparation" in html
-    assert "Locked-test evaluation" in html
+    assert 'id="evidence"' in html
+    assert 'id="simulator"' in html
+    assert 'id="method"' in html
+    assert "Criteo Uplift Prediction v2.1" in html
+    assert "Technical methodology" in html
+    assert 'data-page=' not in html
+    assert 'class="view"' not in html
     assert "split-train-rows" in html
     assert "theme-toggle" in html
     assert "theme-track" in html
-    assert "data-flow-title" in html
-    assert "experiment-rate-chart" in html
-    assert "policy-advantage-chart" in html
+    assert "effect-chart" in html
+    assert "model-chart" in html
+    assert "policy-chart" in html
+    assert "optimizer-chart" in html
     assert "https://www.linkedin.com/in/smasifhossain" in html
     assert 'html[data-theme="dark"]' in css
     assert "campaign-uplift-theme" in javascript
-    assert "renderExperimentRateChart" in javascript
-    assert "renderPolicyAdvantageChart" in javascript
+    assert "renderEffectChart" in javascript
+    assert "renderModelChart" in javascript
+    assert "renderPolicyChart" in javascript

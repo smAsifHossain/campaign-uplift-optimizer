@@ -24,8 +24,11 @@ function updateThemeControl() {
   const button = $("#theme-toggle");
   const label = $("#theme-toggle-label");
   if (!button || !label) return;
-  label.textContent = dark ? "Light mode" : "Dark mode";
-  button.setAttribute("aria-label", dark ? "Use light theme" : "Use dark theme");
+  const action = dark ? "Use light theme" : "Use dark theme";
+  label.textContent = action;
+  button.setAttribute("aria-label", action);
+  button.setAttribute("title", action);
+  button.setAttribute("aria-pressed", String(dark));
   $("#theme-color").setAttribute("content", dark ? "#111512" : "#f7f7f4");
 }
 

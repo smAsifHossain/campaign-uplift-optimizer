@@ -21,7 +21,7 @@ function updateThemeControl() {
   $("#theme-toggle").setAttribute("title", label);
   $("#theme-toggle").setAttribute("aria-pressed", String(dark));
   $("#theme-toggle-label").textContent = label;
-  $("#theme-color").setAttribute("content", dark ? "#121713" : "#f4f5f1");
+  $("#theme-color").setAttribute("content", dark ? "#0c1210" : "#f4f7f6");
 }
 
 function applyTheme(theme, persist = true) {
@@ -233,6 +233,7 @@ function renderResults(results) {
   const experiment = results.experiment;
   const scenario = results.default_scenario.locked_test_result_at_selected_reach;
   const reach = results.selection.selected_reach_on_validation;
+  $("#chart-selected-reach").textContent = percent(reach, 0);
   $("#hero-reach").textContent = percent(reach, 0);
   $("#hero-model").textContent = displayName(results.selection.selected_model);
   $("#hero-profit").textContent = currency.format(scenario.scenario_profit);

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A concise causal machine-learning case study for campaign targeting and budget decisions.">
-    <meta id="theme-color" name="theme-color" content="#f4f5f1">
+    <meta name="description" content="Campaign incrementality analysis and budget optimization using causal machine learning.">
+    <meta id="theme-color" name="theme-color" content="#f6f8fb">
     <title>Campaign Uplift Optimizer · Asif Hossain</title>
     <script>
       (() => {
@@ -17,19 +17,20 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=20261123-3">
+    <link rel="stylesheet" href="styles.css?v=20261124-1">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Campaign Uplift Optimizer home">
-        <span><strong>Campaign Uplift Optimizer</strong><small>Asif Hossain · Data science project</small></span>
+        <span class="brand-icon" aria-hidden="true">U</span>
+        <span><strong>Uplift Optimizer</strong><small>Marketing science portfolio</small></span>
       </a>
       <nav aria-label="Page sections">
-        <a href="#evidence">Evidence</a>
+        <a href="#evidence">Overview</a>
         <a href="#simulator">Simulator</a>
-        <a href="#method">Method</a>
+        <a href="#method">Methodology</a>
       </nav>
       <div class="header-actions">
         <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false" title="Use dark theme">
@@ -40,7 +41,10 @@
           </span>
           <span id="theme-toggle-label" class="sr-only">Use dark theme</span>
         </button>
-        <a class="code-link" href="https://github.com/smAsifHossain/campaign-uplift-optimizer" target="_blank" rel="noreferrer">View code</a>
+        <a class="code-link" href="https://github.com/smAsifHossain/campaign-uplift-optimizer" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.24c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.74-1.55-2.57-.29-5.27-1.28-5.27-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.16 1.18a10.95 10.95 0 0 1 5.76 0c2.19-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.82 1.19 3.08 0 4.41-2.71 5.38-5.29 5.67.42.36.78 1.06.78 2.14v3.18c0 .31.21.67.79.56A11.5 11.5 0 0 0 12 .7Z"></path></svg>
+          GitHub
+        </a>
       </div>
     </header>
 
@@ -49,65 +53,83 @@
       <div id="loading" class="loading" role="status">Loading verified results…</div>
       <div id="load-error" class="error-panel" role="alert" hidden>
         <h1>Results could not be loaded</h1>
-        <p>The analysis artifact is unavailable. Please view the repository for reproducibility instructions.</p>
+        <p>The analysis artifact is unavailable. View the repository for reproducibility instructions.</p>
       </div>
 
       <div id="site-content" hidden>
-        <section id="top" class="hero shell">
-          <div class="hero-copy">
-            <p class="eyebrow">Marketing incrementality · causal machine learning</p>
+        <section id="top" class="page-intro shell">
+          <div>
+            <p class="eyebrow"><span>Case study</span> Causal ML · Experimentation · Decision science</p>
             <h1>Campaign Uplift Optimizer</h1>
-            <p class="lede">Estimating which customers are likely to convert because of advertising, then using that estimate to plan campaign reach.</p>
-            <div class="hero-actions">
-              <a class="primary-action" href="#evidence">See the evidence</a>
-              <a class="secondary-action" href="#simulator">Try the simulator</a>
-            </div>
+            <p class="lede">Identify customers whose conversion probability changes because of advertising, then optimize campaign reach using incremental value.</p>
+          </div>
+          <div class="profile-line">
+            <span>Built by</span>
+            <strong>Asif Hossain</strong>
+            <a href="https://www.linkedin.com/in/smasifhossain" target="_blank" rel="noreferrer" aria-label="Asif Hossain on LinkedIn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V8.98h3.42v1.57h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.29ZM5.32 7.41a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.1 20.45H3.54V8.98H7.1v11.47Z"></path></svg>
+            </a>
+          </div>
+        </section>
+
+        <section id="evidence" class="dashboard shell" aria-label="Campaign analysis overview">
+          <div class="kpis" aria-label="Key results">
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Campaign effect</span><i class="metric-icon effect-icon" aria-hidden="true"></i></div>
+              <strong id="kpi-ate">—</strong>
+              <small id="kpi-ate-ci">—</small>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Selected reach</span><i class="metric-icon reach-icon" aria-hidden="true"></i></div>
+              <strong id="kpi-reach">—</strong>
+              <small>Chosen on validation data</small>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Incremental conversions</span><i class="metric-icon conversion-icon" aria-hidden="true"></i></div>
+              <strong id="kpi-incremental">—</strong>
+              <small>Per 1M eligible customers</small>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Locked test set</span><i class="metric-icon data-icon" aria-hidden="true"></i></div>
+              <strong id="kpi-test-rows">—</strong>
+              <small>Customers held out from selection</small>
+            </article>
           </div>
 
-          <aside class="verdict" aria-labelledby="verdict-title">
-            <p class="verdict-label">Test-set summary</p>
-            <h2 id="verdict-title">Controlled rollout at <span id="hero-reach">—</span> reach</h2>
-            <p>Uplift clearly beat random targeting. Its advantage over propensity was inconclusive, so both policies should be compared in a new experiment.</p>
-            <dl>
-              <div><dt>Selected model</dt><dd id="hero-model">—</dd></div>
-              <div><dt>Scenario profit</dt><dd id="hero-profit">—</dd></div>
-            </dl>
-          </aside>
-        </section>
-
-        <section class="kpis shell" aria-label="Key results">
-          <article><span>Tested customers</span><strong id="kpi-test-rows">—</strong><small>Locked holdout</small></article>
-          <article><span>Average treatment effect</span><strong id="kpi-ate">—</strong><small id="kpi-ate-ci">—</small></article>
-          <article><span>Incremental conversions</span><strong id="kpi-incremental">—</strong><small>Per 1M eligible at selected reach</small></article>
-          <article><span>Selected reach</span><strong id="kpi-reach">—</strong><small>Chosen on validation data</small></article>
-        </section>
-
-        <section id="evidence" class="section shell">
-          <header class="section-heading">
-            <div><p class="eyebrow">Results</p><h2>Test-set evidence</h2></div>
-            <p>Every headline number below comes from the untouched 20% test split.</p>
-          </header>
-
-          <div class="evidence-grid">
-            <article class="panel effect-panel">
-              <div class="panel-heading"><span>Campaign effect</span><strong>Treatment vs control</strong></div>
-              <div id="effect-chart" class="chart compact" aria-label="Treatment and control conversion comparison"></div>
-              <p class="panel-note">The confidence interval excludes zero: the campaign produced a small but statistically detectable average lift.</p>
-            </article>
-
-            <article class="panel models-panel">
-              <div class="panel-heading"><span>Model selection</span><strong>Validation AUUC above random</strong></div>
-              <div id="model-chart" class="chart compact" aria-label="Candidate model validation comparison"></div>
-              <p class="panel-note">Linear T-Learner was selected among causal candidates before the test set was opened.</p>
-            </article>
-
+          <div class="primary-grid">
             <article class="panel policy-panel">
-              <div class="panel-heading split-heading">
-                <div><span>Policy value</span><strong>Incremental conversions by reach</strong></div>
-                <div class="legend"><i class="uplift"></i>Uplift <i class="propensity"></i>Propensity <i class="random"></i>Random</div>
+              <header class="panel-header">
+                <div><p class="panel-kicker">Policy performance</p><h2>Incremental conversions by campaign reach</h2></div>
+                <div class="legend"><span><i class="uplift"></i>Uplift</span><span><i class="propensity"></i>Propensity</span><span><i class="random"></i>Random</span></div>
+              </header>
+              <div id="policy-chart" class="chart primary-chart" aria-label="Incremental conversions by campaign reach"></div>
+              <footer class="chart-footer"><span>Test split · 95% bootstrap intervals calculated separately</span><strong>Selected reach: <span id="chart-selected-reach">—</span></strong></footer>
+            </article>
+
+            <aside class="decision-panel">
+              <div class="decision-label">Recommendation</div>
+              <div class="reach-display"><strong id="hero-reach">—</strong><span>campaign reach</span></div>
+              <h2>Run a controlled rollout</h2>
+              <p>The uplift policy clearly beat random targeting. Its advantage over propensity was inconclusive, so compare both policies in a new randomized experiment.</p>
+              <div class="signal-list">
+                <div><span class="signal positive"></span><p><b>Uplift vs random</b><small>Clear positive advantage</small></p></div>
+                <div><span class="signal neutral"></span><p><b>Uplift vs propensity</b><small>No clear winner</small></p></div>
               </div>
-              <div id="policy-chart" class="chart" aria-label="Incremental conversions by campaign reach"></div>
-              <div class="result-note"><strong>Policy comparison.</strong> Uplift beat random at 20% reach, but did not clearly beat propensity. The next step is a randomized head-to-head policy test.</div>
+              <dl>
+                <div><dt>Model</dt><dd id="hero-model">—</dd></div>
+                <div><dt>Scenario profit</dt><dd id="hero-profit">—</dd></div>
+              </dl>
+            </aside>
+          </div>
+
+          <div class="secondary-grid">
+            <article class="panel compact-panel">
+              <header class="panel-header"><div><p class="panel-kicker">Experiment readout</p><h2>Treatment vs control</h2></div></header>
+              <div id="effect-chart" class="chart compact-chart" aria-label="Treatment and control conversion comparison"></div>
+            </article>
+            <article class="panel compact-panel">
+              <header class="panel-header"><div><p class="panel-kicker">Candidate comparison</p><h2>Validation AUUC above random</h2></div></header>
+              <div id="model-chart" class="chart compact-chart" aria-label="Candidate model validation comparison"></div>
             </article>
           </div>
         </section>
@@ -115,24 +137,27 @@
         <section id="simulator" class="section simulator-section">
           <div class="shell">
             <header class="section-heading">
-              <div><p class="eyebrow">Decision simulator</p><h2>Translate lift into campaign economics.</h2></div>
-              <p>Adjust the business assumptions. The experimental evidence stays fixed.</p>
+              <div><p class="eyebrow"><span>Interactive</span> Decision simulator</p><h2>Test the campaign economics</h2></div>
+              <p>Adjust operational assumptions. The experimental evidence and policy curve remain fixed.</p>
             </header>
 
             <div class="simulator-card">
-              <div class="controls" aria-label="Campaign assumptions">
+              <aside class="controls" aria-label="Campaign assumptions">
+                <div class="controls-title"><h3>Campaign assumptions</h3><span>Illustrative</span></div>
                 <label><span><b>Eligible customers</b><output id="population-output">—</output></span><input id="population-input" type="range" min="100000" max="5000000" step="100000"></label>
                 <label><span><b>Maximum reach</b><output id="reach-output">—</output></span><input id="reach-input" type="range" min="5" max="100" step="5"></label>
                 <label><span><b>Contact cost</b><output id="cost-output">—</output></span><input id="cost-input" type="range" min="1" max="100" step="1"></label>
                 <label><span><b>Value per conversion</b><output id="value-output">—</output></span><input id="value-input" type="range" min="20" max="500" step="10"></label>
-              </div>
+              </aside>
 
               <div class="simulator-output">
-                <div class="output-verdict"><span>Scenario optimum</span><strong id="optimizer-decision-title">—</strong><p id="optimizer-decision-copy">—</p></div>
-                <div class="output-metrics">
-                  <div><span>Target</span><strong id="optimizer-targeted">—</strong><small id="optimizer-fraction">—</small></div>
-                  <div><span>Extra conversions</span><strong id="optimizer-incremental">—</strong><small id="optimizer-conversion-ci">—</small></div>
-                  <div><span>Estimated profit</span><strong id="optimizer-profit">—</strong><small id="optimizer-break-even">—</small></div>
+                <div class="output-topline">
+                  <div class="output-verdict"><span>Scenario optimum</span><strong id="optimizer-decision-title">—</strong><p id="optimizer-decision-copy">—</p></div>
+                  <div class="output-metrics">
+                    <div><span>Target</span><strong id="optimizer-targeted">—</strong><small id="optimizer-fraction">—</small></div>
+                    <div><span>Extra conversions</span><strong id="optimizer-incremental">—</strong><small id="optimizer-conversion-ci">—</small></div>
+                    <div><span>Estimated profit</span><strong id="optimizer-profit">—</strong><small id="optimizer-break-even">—</small></div>
+                  </div>
                 </div>
                 <div id="optimizer-chart" class="chart optimizer-chart" aria-label="Scenario profit by campaign reach"></div>
               </div>
@@ -140,20 +165,20 @@
           </div>
         </section>
 
-        <section id="method" class="section shell method-section">
+        <section id="method" class="section method-section shell">
           <header class="section-heading">
-            <div><p class="eyebrow">Methodology</p><h2>How the analysis was run</h2></div>
-            <p>The analytical workflow from source validation to the campaign decision.</p>
+            <div><p class="eyebrow"><span>Technical</span> Methodology</p><h2>From randomized data to a targeting policy</h2></div>
+            <p>The full analysis path, with separate data for fitting, selection, and final reporting.</p>
           </header>
 
-          <div class="data-snapshot">
+          <div class="data-card">
             <div class="data-intro">
-              <span>Dataset</span>
+              <span class="data-badge">Dataset</span>
               <h3>Criteo Uplift Prediction v2.1</h3>
-              <p>Randomized treatment/control advertising data with 12 anonymized features plus treatment, exposure, visit and conversion outcomes.</p>
+              <p>Randomized treatment/control advertising data with 12 anonymized features plus treatment, exposure, visit, and conversion outcomes.</p>
               <a href="https://ailab.criteo.com/criteo-uplift-prediction-dataset/" target="_blank" rel="noreferrer">Source and license</a>
             </div>
-            <dl>
+            <dl class="data-facts">
               <div><dt>Source rows</dt><dd id="data-source-rows">—</dd></div>
               <div><dt>Analysis sample</dt><dd id="data-sample-rows">—</dd></div>
               <div><dt>Missing values</dt><dd id="data-missing-values">—</dd></div>
@@ -169,60 +194,26 @@
           </div>
 
           <div class="method-table" role="table" aria-label="Technical methodology">
-            <div class="method-header" role="row">
-              <span role="columnheader">Stage</span>
-              <span role="columnheader">Implementation</span>
-              <span role="columnheader">Output</span>
-            </div>
-            <article class="method-row" role="row">
-              <h3 role="cell">Data preparation</h3>
-              <p role="cell">Verified the archive checksum and schema, validated binary fields, scanned the source in chunks, and created a deterministic 10% sample.</p>
-              <p role="cell"><strong id="method-sample-rows">—</strong> records with <strong id="method-missing-values">—</strong> missing values</p>
-            </article>
-            <article class="method-row" role="row">
-              <h3 role="cell">Data split</h3>
-              <p role="cell">Hashed the 12-feature vector so identical customer profiles remain in one partition and cannot leak across splits.</p>
-              <p role="cell"><strong>60% train</strong> · <strong>20% validation</strong> · <strong>20% test</strong></p>
-            </article>
-            <article class="method-row" role="row">
-              <h3 role="cell">Experiment analysis</h3>
-              <p role="cell">Compared observed conversion rates for randomized treatment and control assignments before training a targeting model.</p>
-              <p role="cell"><strong id="method-ate">—</strong> average treatment effect</p>
-            </article>
-            <article class="method-row" role="row">
-              <h3 role="cell">Uplift modeling</h3>
-              <p role="cell">Compared Linear and Boosted T-Learners with a Boosted S-Learner; propensity and random targeting were policy baselines.</p>
-              <p role="cell"><strong>Linear T-Learner</strong> selected among causal candidates</p>
-            </article>
-            <article class="method-row" role="row">
-              <h3 role="cell">Evaluation</h3>
-              <p role="cell">Selected the causal model and reach on validation AUUC, then reported policy curves and bootstrap intervals once on the locked test set.</p>
-              <p role="cell"><strong>Uplift beat random</strong>; propensity difference was inconclusive</p>
-            </article>
-            <article class="method-row" role="row">
-              <h3 role="cell">Campaign decision</h3>
-              <p role="cell">Combined incremental conversions with audience size, contact cost, conversion value, and maximum reach.</p>
-              <p role="cell"><strong>Controlled rollout</strong> with a randomized holdout</p>
-            </article>
+            <div class="method-header" role="row"><span role="columnheader">Stage</span><span role="columnheader">Implementation</span><span role="columnheader">Output</span></div>
+            <article class="method-row" role="row"><h3 role="cell">Data preparation</h3><p role="cell">Verified the archive checksum and schema, validated binary fields, scanned the source in chunks, and created a deterministic 10% sample.</p><p role="cell"><strong id="method-sample-rows">—</strong> records · <strong id="method-missing-values">—</strong> missing</p></article>
+            <article class="method-row" role="row"><h3 role="cell">Data split</h3><p role="cell">Hashed the 12-feature vector so identical customer profiles remain in one partition and cannot leak across splits.</p><p role="cell"><strong>60% train</strong> · <strong>20% validation</strong> · <strong>20% test</strong></p></article>
+            <article class="method-row" role="row"><h3 role="cell">Experiment analysis</h3><p role="cell">Compared observed conversion rates for randomized treatment and control assignments before training a targeting model.</p><p role="cell"><strong id="method-ate">—</strong> average treatment effect</p></article>
+            <article class="method-row" role="row"><h3 role="cell">Uplift modeling</h3><p role="cell">Compared Linear and Boosted T-Learners with a Boosted S-Learner; propensity and random targeting were policy baselines.</p><p role="cell"><strong>Linear T-Learner</strong> selected among causal candidates</p></article>
+            <article class="method-row" role="row"><h3 role="cell">Evaluation</h3><p role="cell">Selected the causal model and reach on validation AUUC, then reported policy curves and bootstrap intervals once on the locked test set.</p><p role="cell"><strong>Uplift beat random</strong>; propensity difference was inconclusive</p></article>
+            <article class="method-row" role="row"><h3 role="cell">Campaign decision</h3><p role="cell">Combined incremental conversions with audience size, contact cost, conversion value, and maximum reach.</p><p role="cell"><strong>Controlled rollout</strong> with a randomized holdout</p></article>
           </div>
         </section>
       </div>
     </main>
 
     <footer class="footer shell">
-      <div>
-        <strong>Asif Hossain</strong>
-        <span>Data science portfolio project</span>
-      </div>
+      <div><strong>Asif Hossain</strong><span>Campaign Uplift Optimizer · Data science portfolio</span></div>
       <div class="footer-links">
-        <a class="linkedin-link" href="https://www.linkedin.com/in/smasifhossain" target="_blank" rel="noreferrer" aria-label="Asif Hossain on LinkedIn">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V8.98h3.42v1.57h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.29ZM5.32 7.41a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.1 20.45H3.54V8.98H7.1v11.47Z"></path></svg>
-          LinkedIn
-        </a>
+        <a href="https://www.linkedin.com/in/smasifhossain" target="_blank" rel="noreferrer">LinkedIn</a>
         <a href="https://github.com/smAsifHossain/campaign-uplift-optimizer" target="_blank" rel="noreferrer">GitHub</a>
       </div>
     </footer>
 
-    <script src="app.js?v=20261123-3"></script>
+    <script src="app.js?v=20261124-1"></script>
   </body>
 </html>

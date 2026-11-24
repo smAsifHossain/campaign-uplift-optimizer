@@ -17,15 +17,14 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=20261123-2">
+    <link rel="stylesheet" href="styles.css?v=20261123-3">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <header class="topbar">
       <a class="brand" href="#top" aria-label="Campaign Uplift Optimizer home">
-        <span class="brand-mark" aria-hidden="true">CU</span>
-        <span><strong>Campaign Uplift</strong><small>Causal ML case study</small></span>
+        <span><strong>Campaign Uplift Optimizer</strong><small>Asif Hossain · Data science project</small></span>
       </a>
       <nav aria-label="Page sections">
         <a href="#evidence">Evidence</a>
@@ -56,9 +55,9 @@
       <div id="site-content" hidden>
         <section id="top" class="hero shell">
           <div class="hero-copy">
-            <p class="eyebrow">Causal machine learning · randomized advertising data</p>
-            <h1>Target the people an ad can actually persuade.</h1>
-            <p class="lede">An end-to-end case study that estimates incremental conversions—not just who is likely to buy—and turns that evidence into a campaign decision.</p>
+            <p class="eyebrow">Marketing incrementality · causal machine learning</p>
+            <h1>Campaign Uplift Optimizer</h1>
+            <p class="lede">Estimating which customers are likely to convert because of advertising, then using that estimate to plan campaign reach.</p>
             <div class="hero-actions">
               <a class="primary-action" href="#evidence">See the evidence</a>
               <a class="secondary-action" href="#simulator">Try the simulator</a>
@@ -66,9 +65,8 @@
           </div>
 
           <aside class="verdict" aria-labelledby="verdict-title">
-            <p class="verdict-label">Locked-test recommendation</p>
-            <div class="verdict-status"><span aria-hidden="true"></span>Controlled rollout</div>
-            <h2 id="verdict-title"><span id="hero-reach">—</span> reach, then test head-to-head.</h2>
+            <p class="verdict-label">Test-set summary</p>
+            <h2 id="verdict-title">Controlled rollout at <span id="hero-reach">—</span> reach</h2>
             <p>Uplift clearly beat random targeting. Its advantage over propensity was inconclusive, so both policies should be compared in a new experiment.</p>
             <dl>
               <div><dt>Selected model</dt><dd id="hero-model">—</dd></div>
@@ -84,17 +82,9 @@
           <article><span>Selected reach</span><strong id="kpi-reach">—</strong><small>Chosen on validation data</small></article>
         </section>
 
-        <section class="summary-band">
-          <div class="shell summary-grid">
-            <article><span>Question</span><h2>Who converts because of the ad?</h2><p>The project separates persuasion from natural purchase intent.</p></article>
-            <article><span>Approach</span><h2>Two potential outcomes per customer.</h2><p>A T-Learner estimates conversion with and without treatment.</p></article>
-            <article><span>Decision</span><h2>Prioritize incremental value.</h2><p>Rank customers by predicted uplift, then apply cost and reach constraints.</p></article>
-          </div>
-        </section>
-
         <section id="evidence" class="section shell">
           <header class="section-heading">
-            <div><p class="eyebrow">The evidence</p><h2>One experiment. Three checks.</h2></div>
+            <div><p class="eyebrow">Results</p><h2>Test-set evidence</h2></div>
             <p>Every headline number below comes from the untouched 20% test split.</p>
           </header>
 
@@ -117,7 +107,7 @@
                 <div class="legend"><i class="uplift"></i>Uplift <i class="propensity"></i>Propensity <i class="random"></i>Random</div>
               </div>
               <div id="policy-chart" class="chart" aria-label="Incremental conversions by campaign reach"></div>
-              <div class="result-note"><strong>Honest result:</strong> uplift beat random at 20% reach, but did not clearly beat propensity. The next step is a randomized head-to-head policy test.</div>
+              <div class="result-note"><strong>Policy comparison.</strong> Uplift beat random at 20% reach, but did not clearly beat propensity. The next step is a randomized head-to-head policy test.</div>
             </article>
           </div>
         </section>
@@ -152,8 +142,8 @@
 
         <section id="method" class="section shell method-section">
           <header class="section-heading">
-            <div><p class="eyebrow">Data and method</p><h2>Enough detail to audit the work.</h2></div>
-            <p>Short by default; expand the technical details when needed.</p>
+            <div><p class="eyebrow">Methodology</p><h2>How the analysis was run</h2></div>
+            <p>The analytical workflow from source validation to the campaign decision.</p>
           </header>
 
           <div class="data-snapshot">
@@ -178,27 +168,42 @@
             </div>
           </div>
 
-          <div class="workflow" aria-label="Analysis workflow">
-            <div><span>01</span><strong>Validate</strong><p>Check schema, integrity, binary fields and missingness.</p></div>
-            <div><span>02</span><strong>Split</strong><p>Keep identical feature vectors in one data partition.</p></div>
-            <div><span>03</span><strong>Compare</strong><p>Train causal candidates and benchmark policies.</p></div>
-            <div><span>04</span><strong>Decide</strong><p>Lock the test set and translate lift into economics.</p></div>
-          </div>
-
-          <div class="details-grid">
-            <details>
-              <summary>Technical methodology <span>Open</span></summary>
-              <div class="details-body">
-                <p><strong>Cleaning and validation.</strong> The official gzip archive was checksum-pinned, schema-validated and scanned in chunks. All expected columns were present, binary outcome fields were verified, and no missing values were found in the analysis sample.</p>
-                <p><strong>Leakage control.</strong> Twelve anonymized features were hashed together. Identical feature vectors stayed in the same 60/20/20 partition.</p>
-                <p><strong>Modeling.</strong> A Linear T-Learner fits separate logistic regressions to treatment and control. Its difference in predicted conversion probability is the customer-level uplift score. Boosted T- and S-Learners were evaluated as causal alternatives; conversion propensity and random targeting served as policy baselines.</p>
-                <p><strong>Selection and evaluation.</strong> The causal model and campaign reach were selected using validation AUUC above random. Final treatment effects, policy curves and bootstrap intervals were reported once on the locked test set.</p>
-              </div>
-            </details>
-            <details>
-              <summary>Limitations and guardrails <span>Open</span></summary>
-              <div class="details-body"><ul id="limitations-list"></ul></div>
-            </details>
+          <div class="method-table" role="table" aria-label="Technical methodology">
+            <div class="method-header" role="row">
+              <span role="columnheader">Stage</span>
+              <span role="columnheader">Implementation</span>
+              <span role="columnheader">Output</span>
+            </div>
+            <article class="method-row" role="row">
+              <h3 role="cell">Data preparation</h3>
+              <p role="cell">Verified the archive checksum and schema, validated binary fields, scanned the source in chunks, and created a deterministic 10% sample.</p>
+              <p role="cell"><strong id="method-sample-rows">—</strong> records with <strong id="method-missing-values">—</strong> missing values</p>
+            </article>
+            <article class="method-row" role="row">
+              <h3 role="cell">Data split</h3>
+              <p role="cell">Hashed the 12-feature vector so identical customer profiles remain in one partition and cannot leak across splits.</p>
+              <p role="cell"><strong>60% train</strong> · <strong>20% validation</strong> · <strong>20% test</strong></p>
+            </article>
+            <article class="method-row" role="row">
+              <h3 role="cell">Experiment analysis</h3>
+              <p role="cell">Compared observed conversion rates for randomized treatment and control assignments before training a targeting model.</p>
+              <p role="cell"><strong id="method-ate">—</strong> average treatment effect</p>
+            </article>
+            <article class="method-row" role="row">
+              <h3 role="cell">Uplift modeling</h3>
+              <p role="cell">Compared Linear and Boosted T-Learners with a Boosted S-Learner; propensity and random targeting were policy baselines.</p>
+              <p role="cell"><strong>Linear T-Learner</strong> selected among causal candidates</p>
+            </article>
+            <article class="method-row" role="row">
+              <h3 role="cell">Evaluation</h3>
+              <p role="cell">Selected the causal model and reach on validation AUUC, then reported policy curves and bootstrap intervals once on the locked test set.</p>
+              <p role="cell"><strong>Uplift beat random</strong>; propensity difference was inconclusive</p>
+            </article>
+            <article class="method-row" role="row">
+              <h3 role="cell">Campaign decision</h3>
+              <p role="cell">Combined incremental conversions with audience size, contact cost, conversion value, and maximum reach.</p>
+              <p role="cell"><strong>Controlled rollout</strong> with a randomized holdout</p>
+            </article>
           </div>
         </section>
       </div>
@@ -218,6 +223,6 @@
       </div>
     </footer>
 
-    <script src="app.js?v=20261123-2"></script>
+    <script src="app.js?v=20261123-3"></script>
   </body>
 </html>

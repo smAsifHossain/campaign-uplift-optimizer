@@ -244,10 +244,12 @@ function renderResults(results) {
   $("#data-source-rows").textContent = number.format(results.source.rows_scanned);
   $("#data-sample-rows").textContent = number.format(results.dataset.overall.rows);
   $("#data-missing-values").textContent = number.format(results.dataset.overall.missing_values);
+  $("#method-sample-rows").textContent = number.format(results.dataset.overall.rows);
+  $("#method-missing-values").textContent = number.format(results.dataset.overall.missing_values);
+  $("#method-ate").textContent = percentagePoints(experiment.absolute_effect);
   $("#split-train-rows").textContent = number.format(results.dataset.train.rows);
   $("#split-validation-rows").textContent = number.format(results.dataset.validation.rows);
   $("#split-test-rows").textContent = number.format(results.dataset.test.rows);
-  $("#limitations-list").innerHTML = results.limitations.map((item) => `<li>${item}</li>`).join("");
   const inputs = results.default_scenario.inputs;
   $("#population-input").value = inputs.population;
   $("#reach-input").value = Math.round(inputs.max_reach * 100);

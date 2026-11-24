@@ -47,7 +47,15 @@ def test_site_is_a_compact_single_page_with_data_method_and_theme_switching() ->
     assert 'id="simulator"' in html
     assert 'id="method"' in html
     assert "Criteo Uplift Prediction v2.1" in html
-    assert "Technical methodology" in html
+    assert 'class="method-table"' in html
+    assert "Data preparation" in html
+    assert "Experiment analysis" in html
+    assert "Uplift modeling" in html
+    assert "Limitations and guardrails" not in html
+    assert "limitations-list" not in html
+    assert "Honest result" not in html
+    assert "summary-band" not in html
+    assert "<details>" not in html
     assert 'data-page=' not in html
     assert 'class="view"' not in html
     assert "split-train-rows" in html
